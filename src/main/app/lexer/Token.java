@@ -1,17 +1,17 @@
 package main.app.lexer;
 
 public class Token {
-	private int location;
+	private int index;
 	private TokenType type;
-	private String value;
+	private String stringValue;
 
-	public Token(int location, TokenType type, String value) {
-		this.location = location + 1;
+	public Token(int index, TokenType type, String stringValue) {
+		this.index = index;
 		this.type = type;
-		this.value = value;
+		this.stringValue = stringValue;
 	}	
 
-	public int getLocation()   { return this.location; }
+	public int getIndex()   { return this.index; }
 	public TokenType getType() { return this.type; }
-	public String getValue()   { return this.value; }
+	public String getStringValue()   { return this.stringValue; }
 }

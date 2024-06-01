@@ -43,11 +43,11 @@ public class Task {
 	public String toString() {
 		String s;
 		if (this.status == Status.OPEN) { 
-			s = String.format("[ ] %s%n", this.name);
+			s = String.format("[ ] %s", this.name);
 		} else if (this.status == Status.IN_PROGRESS) {
-			s = String.format("[.] %s%n", this.name);
+			s = String.format("[.] %s", this.name);
 		} else {
-			s = String.format("[x] %s%n", this.name);
+			s = String.format("[x] %s", this.name);
 		}
 
 		return s;
