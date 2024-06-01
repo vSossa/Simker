@@ -21,15 +21,20 @@ public class Simker {
 	public void menu() {
 		Scanner input = new Scanner(System.in);
 
+		clear();
+		System.out.println("==== Simker ====");
 		for (;;) {
-			System.out.println("==== Simker ====");
 			System.out.print("> ");
 			String command = input.nextLine();	
 			System.out.println();
 			if (parseCommandToOperation(command) == 0) break;	
-			System.out.println();
+			System.out.println("================");
 		}
 		input.close();
+	}
+
+	private void clear() {
+		System.out.printf("\033[H\033[J");
 	}
 
 	private int parseCommandToOperation(String command) { 

@@ -11,7 +11,7 @@ public class Token {
 		this.stringValue = stringValue;
 	}	
 
-	public int getIndex()   { return this.index; }
-	public TokenType getType() { return this.type; }
-	public String getStringValue()   { return this.stringValue; }
+	public int getIndex()          { return this.index; }
+	public TokenType getType()     { return this.type; }
+	public String getStringValue() { return this.stringValue; }
 }

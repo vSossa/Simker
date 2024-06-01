@@ -6,6 +6,8 @@ Each task has a name, an optional description, and a status (open, in progress, 
 You can alter each part of a task after it's creation.
 
 You can save the tasks created in a section to a file. You can also load tasks from a previosly created file.
+
+OBS: most of the app it's incomplete.
 ___
 ## Quick start
 To run the application, do: 
