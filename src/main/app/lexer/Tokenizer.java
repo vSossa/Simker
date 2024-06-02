@@ -19,51 +19,50 @@ public class Tokenizer {
 			// STRING 
 			if (rawToken.startsWith("\"")) { 
 				TokenType type = TokenType.STRING;
-				// "string"
-				if (len > 1 && rawToken.endsWith("\"")) {
-					if (count(rawToken, "\"", 0) > 2) {
-						System.out.printf("%d: ERROR: invalid string literal%n",
-										  index);
-						return null;
-					} 						
+				String stringValue = rawToken;	
+				int endIndex;
 
-					tokens.add( new Token(index, type, rawToken) );
-					++index;
-
-				// "string ..."
+				// string
+				if (count(stringValue, "\"", 0) > 1) {
+					endIndex = index;
+			
+				// ...string...
 				} else {
-					int countStringDelimiter;
-					int endIndex = index + 1;
-					String stringValue = rawToken;
-					while (endIndex < LEN_RAW_TOKENS && 
-						   !stringValue.endsWith("\"")) {
-						stringValue = stringValue.concat(" ")
-												 .concat(rawTokens.get(endIndex));
-						endIndex++;
-					} 
-					
-					countStringDelimiter = count(stringValue, "\"", 0);
-					if (!stringValue.endsWith("\"") && countStringDelimiter >= 2) {
-						System.out.printf("%d: ERROR: invalid start of command%n",
-										  index);
-						return null;
-					} 
-
-					if (!stringValue.endsWith("\"")) {
-						System.out.printf("%d: ERROR: unclosed string literal%n",
-										  endIndex);
-						return null;
-					} 
-
-					if (stringValue.endsWith("\"") && countStringDelimiter > 2) {
-						System.out.printf("%d: ERROR: invalid string literal%n",
-										  endIndex);
-						return null;
-					}
-
-					tokens.add( new Token(endIndex, type, stringValue) );
-					index = endIndex + 1;	
+					endIndex = index;
+					do {
+						++endIndex;
+						stringValue = (endIndex == LEN_RAW_TOKENS) ?
+								stringValue :
+								stringValue.concat(" ").concat(rawTokens.get(endIndex));
+					} while (endIndex < LEN_RAW_TOKENS && 
+							 count(stringValue, "\"", 0) < 2);
 				}
+
+				// CORRETING INDEX FOR ERROR MESSAGING 
+				if (endIndex == LEN_RAW_TOKENS) endIndex--;
+
+				int countStringDelimiter = count(stringValue, "\"", 0);
+				if (!stringValue.endsWith("\"") && countStringDelimiter >= 2) {
+					System.out.printf("%d: ERROR: invalid start of command%n",
+									  index);
+					return null;
+				} 
+
+				if (!stringValue.endsWith("\"") || 
+					 stringValue.endsWith("\"") && stringValue.length() == 1) {
+					System.out.printf("%d: ERROR: unclosed string literal%n",
+									  endIndex);
+					return null;
+				} 
+
+				if (stringValue.endsWith("\"") && countStringDelimiter > 2) {
+					System.out.printf("%d: ERROR: invalid string literal%n",
+									  endIndex);
+					return null;
+				}
+
+				tokens.add( new Token(endIndex, type, stringValue) );
+				index = endIndex + 1;	
 
 			// WHITESPACE
 			} else if (len == 0) {
