@@ -10,18 +10,18 @@ import java.util.ArrayList;
 public class Simker {
 	private List<Task> tasks;	
 
-	public Simker() {
-		this.tasks = new ArrayList<>();	
-	}
-
 	private void todo(String message) {
 		System.out.printf("TODO: %s%n", message);
+	}
+
+	public Simker() {
+		this.tasks = new ArrayList<>();	
 	}
 
 	public void menu() {
 		Scanner input = new Scanner(System.in);
 
-		clear();
+		clear(null);
 		System.out.println("==== Simker ====");
 		for (;;) {
 			System.out.print("> ");
@@ -33,306 +33,193 @@ public class Simker {
 		input.close();
 	}
 
-	private void clear() {
-		System.out.printf("\033[H\033[J");
-	}
-
-	private int parseCommandToOperation(String command) { 
+	public int parseCommandToOperation(String command) { 
 		ArrayList<Token> tokens = Tokenizer.getTokens(command);
 
 		if (tokens == null) return 1;
 		
 		Token op = tokens.get(0);
-		switch (op.getType()) {
-		case COMMAND: {
-			switch (op.getStringValue()) { // see if it's a valid operation
-			case "a": case "add": {
-				addTask(tokens);	
-				break;
-			}	
+		switch (op.getStringValue()) {
+		case "a": case "add": {
+			addTask(tokens);	
+			break;
+		}	
 
-			case "m": case "mark": {
-				markTask(tokens);
-				break;
-			}
+		case "m": case "mark": {
+			markTask(tokens);
+			break;
+		}
 
-			case "h": case "help": {
-				usage(tokens);
-				break;
-			}
+		case "clear": {
+			clear(tokens);
+			break;
+		}
 
-			case "q": case "quit": {
-				quit(tokens);
-				return 0;
-			}
+		case "h": case "help": {
+			usage(tokens);
+			break;
+		}
 
-			case "s": case "show": {
-				showTasks(tokens);	
-				break;
-			}
+		case "q": case "quit": {
+			quit(tokens);
+			return 0;
+		}
 
-			default: {
-				System.out.printf("%d: ERROR: unkown command '%s'%n", 
-								  op.getIndex(),
-								  op.getStringValue());
-				System.out.println("TIP: type 'h' or 'help' for help");
-			}
-			}
+		case "ls": {
+			listTasks(tokens);	
+			break;
+		}
+
+		case "rm": {
+			removeTasks(tokens);
 			break;
 		}
 
 		default: {
-			System.out.printf("%d: ERROR: unkown command '%s'%n", 
+			System.out.printf("%d: ERROR: unknow command '%s'%n", 
 							  op.getIndex(),
 							  op.getStringValue());
 			System.out.println("TIP: type 'h' or 'help' for help");
 		}
-		}
+		}	
 
 		return 1;
 	}
 
-	private void usage(ArrayList<Token> args) {
-		if (args.size() > 1) {
-			System.out.printf("%d: ERROR: '%s' don't accept any arguments%n",
-							  args.get(1).getIndex(),
-							  args.get(0).getStringValue());
+	public void clear(ArrayList<Token> args) {
+		if (args == null || args.size() == 1) {
+			System.out.printf("\033[H\033[J");
 		} else {
-			System.out.println("COMMANDS:");
-				System.out.println("    a, add [status] <name> [description]        add a new task to Simker");
-				System.out.println("    m, mark <index> <status>                    mark the index-task with the given status");
-				System.out.println("    s, show                                     show tasks");
-				System.out.println("    q, quit                                     quit Simker");
-				System.out.println("    h, help                                     show this message");
+			System.out.printf("ERROR: too many arguments for '%s'%n",
+							  args.get(0).getStringValue());
 		}
 	}
 
-	private void addTask(ArrayList<Token> args) { 
-		Token operationName = args.remove(0);
-
+	public void usage(ArrayList<Token> args) {
 		switch (args.size()) {
-		case 0: {
-			System.out.printf("%d: ERROR: missing arguments for '%s'%n",
-							  operationName.getIndex(),
-							  operationName.getStringValue());
-			break;
-		} 
-
 		case 1: {
-			Token arg = args.get(0);				
-			if (arg.getType() != TokenType.STRING) {
-				System.out.printf("%d: ERROR: expected STRING, but got %s%n",
-								  arg.getIndex(),
-								  arg.getType());	
-			} else {
-				this.tasks.add( new Task(arg.getStringValue()) );	
-			}
+			System.out.println("COMMANDS:");
+			System.out.println("    a, add <name> [description]                 add a new task");
+			System.out.println("    m, mark <index> <status>                    mark the index-task with the given status");
+			System.out.println("    clear                                       clear screen");
+			System.out.println("    ls                                          list tasks");
+			System.out.println("    rm <--all | index | indexBegin indexEnd>    remove index-task or all or all of the tasks between indexBegin and indexEnd, inclusive");
+			System.out.println("    q, quit                                     quit Simker");
+			System.out.println("    h, help                                     show this message");
 			break;
 		}
-	
+
 		case 2: {
-			Token arg1 = args.get(0);	
-			Token arg2 = args.get(1);
-			if (arg1.getType() == TokenType.INT) { // status and name
-				if (arg2.getType() != TokenType.STRING) {
-					System.out.printf("%d: ERROR: expected STRING, but got %s%n",
-									  arg2.getIndex(),
-									  arg2.getType());
-				} else {			
-					int statusValue;
-					try {
-						statusValue = Integer.parseInt(arg1.getStringValue());	
-					} catch (NumberFormatException e) {
-						System.out.printf("%d: ERROR: expected 0, 1 or 2, but got '%s'%n",
-										  arg1.getIndex(),
-										  arg1.getStringValue());
-						break;
-					}				
-					Status s = statusValueToStatus(statusValue);	
-					if (s == null) {
-						System.out.printf("%d: ERROR: expected 0, 1 or 2, but got '%d'%n",
-										  arg1.getIndex(),
-										  statusValue);
-					} else {
-						this.tasks.add( new Task(s, arg1.getStringValue()) );
-					}
-				}
-			} else if (arg1.getType() == TokenType.STRING) { // name and description
-				if (arg2.getType() != TokenType.STRING) {
-					System.out.printf("%d: ERROR: expected STRING, but got %s%n",
-									  arg2.getIndex(),
-									  arg2.getStringValue());	
-				} else {
-					this.tasks.add( new Task(arg1.getStringValue(), arg2.getStringValue()) );	
-				}
-			} else { // unknow
-				System.out.printf("%d: ERROR: expected INT or STRING, but got %s%n",
-								  arg1.getIndex(),
-								  arg1.getType());
-			}
-			break;
-		}
-
-		case 3: { 
-			Token arg1 = args.get(0);
-			Token arg2 = args.get(1);
-			Token arg3 = args.get(2);
-			if (arg1.getType() != TokenType.INT) {
-				System.out.printf("%d: ERROR: expected INT, but got %s%n",
-								  arg1.getIndex(),
-								  arg1.getType());
-				break;
-			}
-
-			if (arg2.getType() != TokenType.STRING) {
-				System.out.printf("%d: ERROR: expected STRING, but got %s%n",
-								  arg2.getIndex(),
-								  arg2.getType());
-				break;
-			}
-
-			if (arg3.getType() != TokenType.STRING) {
-				System.out.printf("%d: ERROR: expected STRING, but got %s%n",
-								  arg3.getIndex(),
-								  arg3.getType());
-				break;
-			}
-
-			int statusValue;
-			try {
-				statusValue = Integer.parseInt(arg1.getStringValue());	
-			} catch (NumberFormatException e) {
-				System.out.printf("%d: ERROR: expected 0, 1 or 2, but got '%s'%n",
-								  arg1.getIndex(),
-								  arg1.getStringValue());
-				break;
-			}				
-			Status s = statusValueToStatus(statusValue);	
-			if (s == null) {
-				System.out.printf("%d: ERROR: expected 0, 1 or 2, but got '%d'%n",
-								  arg1.getIndex(),
-								  statusValue);
+			Token subcommand = args.get(1);
+			if (subcommand.getStringValue().equals("-v") || 
+				subcommand.getStringValue().equals("--verbose")) {
+				todo("usage -v");
 			} else {
-				this.tasks.add( new Task(s, arg2.getStringValue(), arg3.getStringValue()) );
+				System.out.printf("%d: ERROR: unknow subcommand '%s'%n",
+								  subcommand.getIndex(),
+								  subcommand.getStringValue());
 			}
 			break;
 		}
 
 		default: {
-			System.out.printf("%d: ERROR: too many arguments for '%s'%n",
-							 args.get(3).getIndex(),
-							 operationName.getStringValue());
-		}
+			System.out.printf("ERROR: too many arguments for '%s'%n",
+							  args.get(0).getStringValue());
+		}	
 		}
 	}
 
-	private Status statusValueToStatus(int statusValue) {
-		Status s;
-		if (statusValue == 0) {
-			s = Status.OPEN;	
-		} else if (statusValue == 1) {
-			s = Status.IN_PROGRESS;
-		} else if (statusValue == 2) {
-			s = Status.CLOSED;
-		} else {
-			s = null;
-		}
-
-		return s;
+	public void removeTasks(ArrayList<Token> args) {
+		todo("removeTasks");
 	}
 
-	private void markTask(ArrayList<Token> args) {
-		Token operationName = args.remove(0);
-		
-		int len = args.size();
-		if (len < 2) {
-			System.out.printf("%d: ERROR: missing arguments for '%s'%n",
-							  args.get(1).getIndex(),
-							  operationName.getStringValue());
-		} else if (len > 2) {
-			System.out.printf("%d: ERROR: too many arguments for '%s'%n",
-							  args.get(2).getIndex(),
-							  operationName.getStringValue());
-		} else {
-			Token arg1 = args.get(0);
-			Token arg2 = args.get(1);
+	public void addTask(ArrayList<Token> args) { 
+		switch (args.size()) {
+		case 1: {
+			System.out.printf("ERROR: not enough arguments for '%s'%n",
+							  args.get(0).getStringValue());
+			break;
+		}
 
-			if (arg1.getType() != TokenType.INT) {
-				System.out.printf("%d: ERROR: expected INT, but got %s%n",
-								  arg1.getIndex(),
-								  arg1.getType());
-				return ;
+		case 2: {
+			Token name = args.get(1);
+			if (name.getType() != TokenType.STRING) {
+				System.out.printf("%d: ERROR: expected STRING but got: '%s'%n",
+								  name.getIndex(),
+								  name.getType());
+			} else {
+				this.tasks.add( new Task(name.getStringValue()) );	
 			}
+			break;
+		}
 
-			if (arg2.getType() != TokenType.INT) {
-				System.out.printf("%d: ERROR: expected INT, but got %s%n",
-								  arg2.getIndex(),
-								  arg2.getType());
-				return ;
+		case 3: {
+			Token name = args.get(1);
+			Token description = args.get(2);
+			if (name.getType() != TokenType.STRING ) {
+				System.out.printf("%d: ERROR: expected STRING but got: '%s'%n",
+								  name.getIndex(),
+								  name.getType());
+			} else if (description.getType() != TokenType.STRING) {
+				System.out.printf("%d: ERROR: expected STRING but got: '%s'%n",
+								  description.getIndex(),
+								  description.getType());
+			} else {
+				this.tasks.add( new Task(name.getStringValue(), description.getStringValue()) );	
 			}
+			break;
+		}
 
-			int index;
-			try {
-				index = Integer.parseUnsignedInt(arg1.getStringValue());
-			} catch (NumberFormatException e) {
-				System.out.printf("%d: ERROR: expected a non-negative value, but got %s%n", 
-								  arg1.getIndex(),
-								  arg1.getStringValue());
-				return ;
-			}
-			if (!isValidIndex(index)) {
-				System.out.printf("%d: ERROR: '%d' is out of range%n",
-								  arg1.getIndex(),
-								  index);	
-			} else { 
-				int statusValue;
-				try {
-					statusValue = Integer.parseInt(arg2.getStringValue());	
-				} catch (NumberFormatException e) {
-					System.out.printf("%d: ERROR: expected 0, 1 or 2, but got '%s'%n",
-									  arg2.getIndex(),
-									  arg2.getStringValue());
-					return ;
-				}				
-				Status s = statusValueToStatus(statusValue);	
-				if (s == null) {
-					System.out.printf("%d: ERROR: expected 0, 1 or 2, but got '%d'%n",
-									  arg2.getIndex(),
-									  statusValue);
-				} else {
-					Task t = this.tasks.get(index);
-					t.setStatus(s);	
-					this.tasks.set(index, t);
-				}
-			}	
+		default: {
+			System.out.printf("ERROR: too many arguments for '%s'%n",
+							   args.get(0).getStringValue());
+		}
 		}
 	}
 
-	private boolean isValidIndex(int index) {
-		return (0 <= index && index < this.tasks.size());
+	public void markTask(ArrayList<Token> args) {
+		switch (args.size()) {
+		case 1: case 2: {
+			System.out.printf("ERROR: missing arguments for '%s'%n",
+							  args.get(0).getStringValue());
+			break;
+		}
+
+		case 3: {
+			markTask(args.get(1), args.get(2));
+			break;
+		}
+
+		default: {
+			System.out.printf("ERROR: too many arguments for '%s'%n",
+							  args.get(0).getStringValue());
+		}
+		}
 	}
 
-	private void showTasks(ArrayList<Token> args) {
+	public void listTasks(ArrayList<Token> args) {
 		// TODO: allow the user to specify the type of task
 		// that they wanna see, the number, if it's from the
 		// beginning or the end. 
-		Token operationName = args.remove(0);
-		
 		switch (args.size()) {
-		case 0: {
+		case 1: {
+			int i = 0;
 			for (Task task : this.tasks) {
-				System.out.println(task);
+				System.out.println(i + ". " + task);
+				++i;
 			}
 			break;
 		}
 		
 		default: {
+			System.out.printf("ERROR: too many arguments for '%s'%n",
+							  args.get(0).getStringValue());
 			break;	
 		}
 		}
 	}
 
-	private void quit(ArrayList<Token> args) {
+	public void quit(ArrayList<Token> args) {
 		// TODO: allow the user to save the tasks to a file
 		if (args.size() > 1) {
 			System.out.printf("%d: ERROR: '%s' dont't accept any arguments%n",
@@ -341,5 +228,116 @@ public class Simker {
 		} else {
 			System.out.println("Goodbye!");
 		}
+	}
+
+	private void markTask(Token index, Token status) {
+		if (index.getType() != TokenType.INT) {
+			System.out.printf("%d: ERROR: expected INT but got: %s%n",
+							  index.getIndex(),
+							  index.getType());
+		} else { 			
+			int i = Integer.parseInt(index.getStringValue());
+			if (isOutOfBounds(i)) {
+				System.out.printf("%d: ERROR: '%d' is out of bounds for '%d'%n",
+								  index.getIndex(),
+								  i,
+								  this.tasks.size());	
+			} else {	
+				switch (status.getType()) {
+				case INT: {
+					int statusValue = Integer.parseInt(status.getStringValue());
+					Status s = statusValueToStatus(statusValue);
+					if (s == null) {
+						System.out.printf("%d: ERROR: invalid status code: '%s'%n",
+										  status.getIndex(),
+										  statusValue);
+					} else {
+						Task t = this.tasks.get(i);
+						t.setStatus(s);	
+						this.tasks.set(i, t);
+					}
+					break;
+				}
+
+				case COMMAND: {
+					String statusString = status.getStringValue();
+					Status s = statusStringToStatus(statusString);
+					if (s == null) {
+						System.out.printf("%d: ERROR: invalid subcommand: '%s'%n",
+										  status.getIndex(),
+										  statusString);
+					} else {
+						Task t = this.tasks.get(i);
+						t.setStatus(s);	
+						this.tasks.set(i, t);
+					}
+					break;
+				}
+
+				default: {
+					System.out.printf("%d: ERROR: expected COMMAND or INT: %s%n",
+									  status.getIndex(),
+									  status.getType());
+				}
+				}
+			}
+		}
+	}
+
+	private boolean isOutOfBounds(int index) {
+		return 0 > index || index >= this.tasks.size(); 
+	}
+
+
+	private Status statusValueToStatus(int statusValue) {
+		Status s;
+		switch (statusValue) {
+		case 0: {
+			s = Status.OPEN;	
+			break;
+		}
+
+		case 1: {
+			s = Status.IN_PROGRESS;
+			break;
+		}
+
+		case 2: {
+			s = Status.CLOSED;
+			break;
+		}
+		
+		default: {
+			s = null;
+		}
+		}
+
+		return s;
+	}
+
+	private Status statusStringToStatus(String statusString) {
+		Status s;
+		switch (statusString) {
+		case "--open": case "-o": {
+			s = Status.OPEN;	
+			break;
+		} 
+
+		case "--in-progress": case "-i": {
+			s = Status.IN_PROGRESS;
+			break;
+		}
+	
+		case "--closed": case "-c": {
+			s = Status.CLOSED;
+			break;
+		}
+		
+		default: {
+			s = null;
+		}
+		}
+
+		return s;
 	}
 }

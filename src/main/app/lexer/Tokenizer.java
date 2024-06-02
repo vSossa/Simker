@@ -112,19 +112,6 @@ public class Tokenizer {
 				tokens.add( new Token(index, TokenType.INT, rawToken) );	
 				++index;
 
-			// NEGATIVE INT
-			} else if (len > 1 && rawToken.charAt(0) == '-') {	
-				for (int i = 1; i < len; ++i) {
-					if (!Character.isDigit(rawToken.charAt(i))) {
-						System.out.printf("%d: ERROR: invalid integer%n",
-										  index);
-						return null;
-					}
-				}
-
-				tokens.add( new Token(index, TokenType.INT, rawToken) );
-				++index;
-
 			// COMMAND
 			} else {
 				tokens.add( new Token(index, TokenType.COMMAND, rawToken) );

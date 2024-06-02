@@ -17,7 +17,7 @@ public class Task {
 				String name) {
 		this.status = status;
 		this.name = name;
-		this.description = null;
+		this.description = "";
 	}
 
 	public Task(String name,
@@ -30,7 +30,7 @@ public class Task {
 	public Task(String name) {
 		this.status = Status.OPEN;
 		this.name = name;
-		this.description = null;
+		this.description = "";
 	}
 
 	public Status getStatus()      { return this.status; }
@@ -43,11 +43,32 @@ public class Task {
 	public String toString() {
 		String s;
 		if (this.status == Status.OPEN) { 
-			s = String.format("[ ] %s", this.name);
+			if (this.description.isEmpty()) {
+				s = String.format("[ ] %s", 
+								  this.name);
+			} else {
+				s = String.format("[ ] %s: %s", 	
+								  this.name, 
+								  this.description);
+			}
 		} else if (this.status == Status.IN_PROGRESS) {
-			s = String.format("[.] %s", this.name);
+			if (this.description.isEmpty()) {
+				s = String.format("[.] %s", 
+								  this.name);
+			} else {
+				s = String.format("[.] %s: %s", 	
+								  this.name, 
+								  this.description);
+			}
 		} else {
-			s = String.format("[x] %s", this.name);
+			if (this.description.isEmpty()) {
+				s = String.format("[x] %s", 
+								  this.name);
+			} else {
+				s = String.format("[x] %s: %s", 	
+								  this.name, 
+								  this.description);
+			}
 		}
 
 		return s;
