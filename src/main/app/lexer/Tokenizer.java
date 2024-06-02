@@ -37,14 +37,9 @@ public class Tokenizer {
 					String stringValue = rawToken;
 					while (endIndex < LEN_RAW_TOKENS && 
 						   !stringValue.endsWith("\"")) {
+						stringValue = stringValue.concat(" ")
+												 .concat(rawTokens.get(endIndex));
 						endIndex++;
-						if (endIndex == LEN_RAW_TOKENS) {	
-							stringValue = stringValue.concat(" ")
-													 .concat(rawTokens.get(endIndex - 1));
-						} else {
-							stringValue = stringValue.concat(" ")
-													 .concat(rawTokens.get(endIndex));
-						}
 					} 
 					
 					countStringDelimiter = count(stringValue, "\"", 0);
