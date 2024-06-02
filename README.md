@@ -1,26 +1,17 @@
-# Description
-SIMple tasK managER app, or Simker, is a terminal application. 
+# Simker (**SIM**ple tas**K** manag**ER**)
+It's a simple terminal app for task management. 
+___
+## Description
+The operations on the app are intend to be similar to bash commands. Per example:
 
-Each task has a name, an optional description, and a status (open, in progress, or closed).
+To see the tasks, the operation would be `ls`.
 
-You can alter each part of a task after it's creation.
+The tasks have a name, an optional description, and a status (open, in progress, or closed).
 
-You can save the tasks created in a section to a file. You can also load tasks from a previosly created file.
-
-OBS: most of the app it's incomplete.
+The tasks can be save in a file and loaded from a file.
 ___
 ## Quick start
-To run the application, do: 
-
 ```console
 $ javac -cp /src src/main/Main.java 
 $ java main.Main 
-```
-
-And to run the tests, do 
-
-
-```console
-$ javac -cp /src src/test/Tests.java
-$ java -ea test.Tests # -ea enables the assertions 
 ```
