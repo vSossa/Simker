@@ -27,10 +27,12 @@ public class Simker {
 			System.out.print("> ");
 			String command = input.nextLine();	
 			System.out.println();
-			if (parseCommandToOperation(command) == 0) break;	
+			if (parseCommandToOperation(command) == 0) {
+				input.close();
+				break;	
+			}	
 			System.out.println("================");
 		}
-		input.close();
 	}
 
 	public int parseCommandToOperation(String command) { 
@@ -105,7 +107,7 @@ public class Simker {
 			System.out.println("    ls                                          list tasks");
 			System.out.println("    rm <--all | index | indexBegin indexEnd>    remove index-task or all or all of the tasks between indexBegin and indexEnd, inclusive");
 			System.out.println("    q, quit                                     quit Simker");
-			System.out.println("    h, help                                     show this message");
+			System.out.println("    h, help [-v | --verbose]                    show this message");
 			break;
 		}
 
@@ -287,7 +289,6 @@ public class Simker {
 	private boolean isOutOfBounds(int index) {
 		return 0 > index || index >= this.tasks.size(); 
 	}
-
 
 	private Status statusValueToStatus(int statusValue) {
 		Status s;
