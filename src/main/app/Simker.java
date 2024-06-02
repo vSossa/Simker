@@ -132,7 +132,28 @@ public class Simker {
 	}
 
 	public void removeTasks(ArrayList<Token> args) {
-		todo("removeTasks");
+		switch (args.size()) {
+		case 1: {
+			System.out.printf("ERROR: not enough arguments for '%s'%n",
+							  args.get(0).getStringValue());
+			break;
+		}
+
+		case 2: {
+			removeTask(args.get(1));
+			break;
+		}
+
+		case 3: {
+			todo("rm INT INT");
+			break;
+		}
+
+		default: {
+			System.out.printf("ERROR: too many arguments for '%s'%n",
+							  args.get(0).getStringValue());
+		}
+		}
 	}
 
 	public void addTask(ArrayList<Token> args) { 
@@ -205,10 +226,12 @@ public class Simker {
 		// beginning or the end. 
 		switch (args.size()) {
 		case 1: {
-			int i = 0;
-			for (Task task : this.tasks) {
-				System.out.println(i + ". " + task);
-				++i;
+			if (this.tasks.isEmpty()) {
+				System.out.println("**empty**");
+			} else {
+				for (int i = 0; i < this.tasks.size(); ++i) {
+					System.out.println(i + ". " + this.tasks.get(i));
+				}
 			}
 			break;
 		}
@@ -216,7 +239,6 @@ public class Simker {
 		default: {
 			System.out.printf("ERROR: too many arguments for '%s'%n",
 							  args.get(0).getStringValue());
-			break;	
 		}
 		}
 	}
@@ -232,57 +254,96 @@ public class Simker {
 		}
 	}
 
+	private void removeTask(Token arg) {
+		switch (arg.getType()) {
+		case INT: {
+			int index = Integer.parseInt(arg.getStringValue());
+			if (isOutOfBounds(index)) {
+				System.out.printf("%d: ERROR: %d is out of bounds%n",
+								  arg.getIndex(),
+								  index);
+				return ;
+			}
+
+			System.out.printf("Removing %d-task...%n",
+							  index);
+			this.tasks.remove(index);
+			break;
+		}
+
+		case COMMAND: {
+			if (arg.getStringValue().equals("--all") ||
+				arg.getStringValue().equals("-a")) {
+				System.out.printf("Removing all tasks...%n");
+				this.tasks.clear();
+			} else {
+				System.out.printf("%d: ERROR: unknow subcommand: '%s'%n",
+								  arg.getIndex(), 
+								  arg.getStringValue());
+			}
+			break;
+		} 
+
+		default: {
+			System.out.printf("%d: ERROR: unknow subcommand: '%s'%n",
+						      arg.getIndex(),
+							  arg.getStringValue());
+		}
+		}
+	} 
+
 	private void markTask(Token index, Token status) {
 		if (index.getType() != TokenType.INT) {
 			System.out.printf("%d: ERROR: expected INT but got: %s%n",
 							  index.getIndex(),
 							  index.getType());
-		} else { 			
-			int i = Integer.parseInt(index.getStringValue());
-			if (isOutOfBounds(i)) {
-				System.out.printf("%d: ERROR: '%d' is out of bounds for '%d'%n",
-								  index.getIndex(),
-								  i,
-								  this.tasks.size());	
-			} else {	
-				switch (status.getType()) {
-				case INT: {
-					int statusValue = Integer.parseInt(status.getStringValue());
-					Status s = statusValueToStatus(statusValue);
-					if (s == null) {
-						System.out.printf("%d: ERROR: invalid status code: '%s'%n",
-										  status.getIndex(),
-										  statusValue);
-					} else {
-						Task t = this.tasks.get(i);
-						t.setStatus(s);	
-						this.tasks.set(i, t);
-					}
-					break;
-				}
+			return ;
+		} 
 
-				case COMMAND: {
-					String statusString = status.getStringValue();
-					Status s = statusStringToStatus(statusString);
-					if (s == null) {
-						System.out.printf("%d: ERROR: invalid subcommand: '%s'%n",
-										  status.getIndex(),
-										  statusString);
-					} else {
-						Task t = this.tasks.get(i);
-						t.setStatus(s);	
-						this.tasks.set(i, t);
-					}
-					break;
-				}
+		int i = Integer.parseInt(index.getStringValue());
+		if (isOutOfBounds(i)) {
+			System.out.printf("%d: ERROR: '%d' is out of bounds%n",
+							  index.getIndex(),
+							  i);
+			return ;
+		} 	
 
-				default: {
-					System.out.printf("%d: ERROR: expected COMMAND or INT: %s%n",
-									  status.getIndex(),
-									  status.getType());
-				}
-				}
+		switch (status.getType()) {
+		case INT: {
+			int statusValue = Integer.parseInt(status.getStringValue());
+			Status s = statusValueToStatus(statusValue);
+			if (s == null) {
+				System.out.printf("%d: ERROR: invalid status code: '%s'%n",
+								  status.getIndex(),
+								  statusValue);
+			} else {
+				Task t = this.tasks.get(i);
+				t.setStatus(s);	
+				this.tasks.set(i, t);
 			}
+			break;
+		}
+
+		case COMMAND: {
+			String statusString = status.getStringValue();
+			Status s = statusStringToStatus(statusString);
+			if (s == null) {
+				System.out.printf("%d: ERROR: invalid subcommand: '%s'%n",
+								  status.getIndex(),
+								  statusString);
+			} else {
+				Task t = this.tasks.get(i);
+				t.setStatus(s);	
+				this.tasks.set(i, t);
+			}
+			break;
+		}
+
+		default: {
+			System.out.printf("%d: ERROR: expected COMMAND or INT: %s%n",
+							  status.getIndex(),
+							  status.getType());
+		}
 		}
 	}
 
