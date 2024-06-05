@@ -3,9 +3,9 @@ package main;
 import main.app.Simker;
 
 public class Main {
-	public static void main(String[] args) {
-		Simker app = new Simker();
+	static Simker app = new Simker();
 
+	public static void main(String[] args) {
 		app.menu();
 	}
 }

@@ -150,7 +150,11 @@ public class Tokenizer {
 		int offset = prefix.length();
 		int len = string.length();
 
-		if (startIndex >= len || startIndex < 0) return -1;
+		if (startIndex >= len || 
+			startIndex < 0 || 
+			offset == 0) { 
+			return -1;
+		} 
 
 		while (location < len && 
 			   string.startsWith(prefix, location)) {

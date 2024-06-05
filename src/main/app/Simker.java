@@ -78,7 +78,7 @@ public class Simker {
 		}
 
 		default: {
-			System.out.printf("%d: ERROR: unknow command '%s'%n", 
+			System.out.printf("%d: ERROR: unknow command: %s%n", 
 							  op.getIndex(),
 							  op.getStringValue());
 			System.out.println("TIP: type 'h' or 'help' for help");
@@ -101,13 +101,13 @@ public class Simker {
 		switch (args.size()) {
 		case 1: {
 			System.out.println("COMMANDS:");
-			System.out.println("    a, add <name> [description]                 add a new task");
-			System.out.println("    m, mark <index> <status>                    mark the index-task with the given status");
-			System.out.println("    clear                                       clear screen");
-			System.out.println("    ls                                          list tasks");
-			System.out.println("    rm <--all | index | indexBegin indexEnd>    remove index-task or all or all of the tasks between indexBegin and indexEnd, inclusive");
-			System.out.println("    q, quit                                     quit Simker");
-			System.out.println("    h, help [-v | --verbose]                    show this message");
+			System.out.println("    a, add <name> [description]                      add a new task");
+			System.out.println("    m, mark <index> <status>                         mark the index-task with the given status");
+			System.out.println("    clear                                            clear screen");
+			System.out.println("    ls                                               list tasks");
+			System.out.println("    rm <-a | --all | index | indexBegin indexEnd>    remove index-task or all or all of the tasks between indexBegin and indexEnd, inclusive");
+			System.out.println("    q, quit                                          quit Simker");
+			System.out.println("    h, help [-v | --verbose]                         show this message");
 			break;
 		}
 
@@ -115,7 +115,7 @@ public class Simker {
 			Token subcommand = args.get(1);
 			if (subcommand.getStringValue().equals("-v") || 
 				subcommand.getStringValue().equals("--verbose")) {
-				todo("usage -v");
+				todo("verbose usage message");
 			} else {
 				System.out.printf("%d: ERROR: unknow subcommand '%s'%n",
 								  subcommand.getIndex(),
@@ -145,7 +145,8 @@ public class Simker {
 		}
 
 		case 3: {
-			todo("rm INT INT");
+			removeTaskRange(args.get(1),
+							args.get(2));
 			break;
 		}
 
@@ -209,7 +210,8 @@ public class Simker {
 		}
 
 		case 3: {
-			markTask(args.get(1), args.get(2));
+			markTask(args.get(1), 
+					 args.get(2));
 			break;
 		}
 
@@ -291,6 +293,52 @@ public class Simker {
 		}
 		}
 	} 
+
+	private void removeTaskRange(Token indexStart, Token indexEnd) {
+		if (indexStart.getType() != TokenType.INT) {
+			System.out.printf("%d: ERROR: expected INT but got: %s%n", 
+							  indexStart.getIndex(),
+							  indexStart.getStringValue()); 
+			return ;
+		}	
+
+		if (indexEnd.getType() != TokenType.INT) {
+			System.out.printf("%d: ERROR: expected INT but got: %s%n", 
+							  indexEnd.getIndex(),
+							  indexEnd.getStringValue()); 
+			return ;
+		}
+
+		int i, j;	
+		i = Integer.parseInt(indexStart.getStringValue());
+		if (isOutOfBounds(i)) {
+			System.out.printf("%d: ERROR: %d is out of bounds%n", 
+							  indexStart.getIndex(),
+							  i); 
+			return ;
+		}
+
+		j = Integer.parseInt(indexEnd.getStringValue());
+		if (isOutOfBounds(j)) {
+			System.out.printf("%d: ERROR: %d is out of bounds%n", 
+							  indexEnd.getIndex(),
+							  j); 
+			return ;
+		}
+
+		if (j < i) {
+			System.out.printf("ERROR: invalid range: %d < %d%n", 
+							  j, i);
+			return ;
+		}	
+
+		System.out.printf("Removing all tasks between %d and %d%n",
+						  i, j);
+		while (i <= j) {
+			this.tasks.remove(i);
+			++i;	
+		}
+	}
 
 	private void markTask(Token index, Token status) {
 		if (index.getType() != TokenType.INT) {
