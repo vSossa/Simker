@@ -9,15 +9,15 @@ public class Tokenizer {
 		ArrayList<Token> tokens = new ArrayList<>();
 
 		rawTokens = getRawTokens(string);
-		if (rawTokens.isEmpty()) return tokens;
+		if (rawTokens.isEmpty()) return null;
 
 		final int LEN_RAW_TOKENS = rawTokens.size();
 		while (index < LEN_RAW_TOKENS) {
 			String rawToken = rawTokens.get(index);
 			int len = rawToken.length();
 
-			// STRING "
-			if (rawToken.startsWith("\"")) { 
+			// "STRING"
+			if (count(rawToken, "\"", 0) >= 1) { 
 				TokenType type = TokenType.STRING;
 				String stringValue = rawToken;	
 				int endIndex;
@@ -49,7 +49,8 @@ public class Tokenizer {
 				} 
 
 				if (!stringValue.endsWith("\"") || 
-					 stringValue.endsWith("\"") && stringValue.length() == 1) {
+					(stringValue.endsWith("\"") && stringValue.length() == 1) ||
+					!stringValue.startsWith("\"")) {
 					System.out.printf("%d: ERROR: unclosed string literal%n",
 									  endIndex);
 					return null;
@@ -64,8 +65,8 @@ public class Tokenizer {
 				tokens.add( new Token(endIndex, type, stringValue) );
 				index = endIndex + 1;	
 	
-			// STRING '
-			} else if (rawToken.startsWith("\'")) {
+			// 'STRING'
+			} else if (count(rawToken, "\'", 0) >= 1) {
 				TokenType type = TokenType.STRING;
 				String stringValue = rawToken;	
 				int endIndex;
@@ -97,7 +98,8 @@ public class Tokenizer {
 				} 
 
 				if (!stringValue.endsWith("\'") || 
-					 stringValue.endsWith("\'") && stringValue.length() == 1) {
+					(stringValue.endsWith("\'") && stringValue.length() == 1) ||
+					!stringValue.startsWith("\'")) {
 					System.out.printf("%d: ERROR: unclosed string literal%n",
 									  endIndex);
 					return null;

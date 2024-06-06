@@ -5,7 +5,9 @@ public class Token {
 	private TokenType type;
 	private String stringValue;
 
-	public Token(int index, TokenType type, String stringValue) {
+	public Token(int index, 
+				 TokenType type, 
+				 String stringValue) {
 		this.index = index;
 		this.type = type;
 		this.stringValue = stringValue;

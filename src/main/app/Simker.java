@@ -23,16 +23,16 @@ public class Simker {
 
 		clear(null);
 		System.out.println("==== Simker ====");
-		for (;;) {
-			System.out.print("> ");
-			String command = input.nextLine();	
-			System.out.println();
-			if (parseCommandToOperation(command) == 0) {
-				input.close();
-				break;	
-			}	
+		System.out.print("> ");
+		String command = input.nextLine();	
+		System.out.println();
+		while (parseCommandToOperation(command) != 0) { 
 			System.out.println("================");
+			System.out.print("> ");
+			command = input.nextLine();	
+			System.out.println();
 		}
+		input.close();
 	}
 
 	public int parseCommandToOperation(String command) { 
