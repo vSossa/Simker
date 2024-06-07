@@ -47,7 +47,7 @@ public class Task {
 				s = String.format("[ ] %s", 
 								  this.name);
 			} else {
-				s = String.format("[ ] %s: %s", 	
+				s = String.format("[ ] %s : %s", 	
 								  this.name, 
 								  this.description);
 			}
@@ -56,7 +56,7 @@ public class Task {
 				s = String.format("[.] %s", 
 								  this.name);
 			} else {
-				s = String.format("[.] %s: %s", 	
+				s = String.format("[.] %s : %s", 	
 								  this.name, 
 								  this.description);
 			}
@@ -65,7 +65,7 @@ public class Task {
 				s = String.format("[x] %s", 
 								  this.name);
 			} else {
-				s = String.format("[x] %s: %s", 	
+				s = String.format("[x] %s : %s", 	
 								  this.name, 
 								  this.description);
 			}

@@ -8,7 +8,7 @@ public class Tokenizer {
 		ArrayList<String> rawTokens = new ArrayList<>();
 		ArrayList<Token> tokens = new ArrayList<>();
 
-		rawTokens = getRawTokens(string);
+		rawTokens = splitString(string, ' ');
 		if (rawTokens.isEmpty()) return null;
 
 		final int LEN_RAW_TOKENS = rawTokens.size();
@@ -52,17 +52,17 @@ public class Tokenizer {
 					(stringValue.endsWith("\"") && stringValue.length() == 1) ||
 					!stringValue.startsWith("\"")) {
 					System.out.printf("%d: ERROR: unclosed string literal%n",
-									  endIndex);
+									  index);
 					return null;
 				} 
 
 				if (stringValue.endsWith("\"") && countStringDelimiter > 2) {
 					System.out.printf("%d: ERROR: invalid string literal%n",
-									  endIndex);
+									  index);
 					return null;
 				}
 
-				tokens.add( new Token(endIndex, type, stringValue) );
+				tokens.add( new Token(endIndex, type, stringValue.replace("\"", "")) );
 				index = endIndex + 1;	
 	
 			// 'STRING'
@@ -101,17 +101,17 @@ public class Tokenizer {
 					(stringValue.endsWith("\'") && stringValue.length() == 1) ||
 					!stringValue.startsWith("\'")) {
 					System.out.printf("%d: ERROR: unclosed string literal%n",
-									  endIndex);
+									  index);
 					return null;
 				} 
 
 				if (stringValue.endsWith("\'") && countStringDelimiter > 2) {
 					System.out.printf("%d: ERROR: invalid string literal%n",
-									  endIndex);
+									  index);
 					return null;
 				}
 
-				tokens.add( new Token(endIndex, type, stringValue) );
+				tokens.add( new Token(endIndex, type, stringValue.replace("\'", "")) );
 				index = endIndex + 1;	
 
 			// WHITESPACE
@@ -153,8 +153,7 @@ public class Tokenizer {
 		int len = string.length();
 
 		if (startIndex >= len || 
-			startIndex < 0 || 
-			offset == 0) { 
+			startIndex < 0) {
 			return -1;
 		} 
 
@@ -201,7 +200,7 @@ public class Tokenizer {
 		the only spaces that are strip off the string are those in 
 		the beggining. 
 	*/
-	private static ArrayList<String> getRawTokens(String string) {
+	public static ArrayList<String> splitString(String string, char delimiter) {
 		int location, locationEnd;
 		int len = string.length();
 		ArrayList<String> rawTokens = new ArrayList<>();
@@ -210,7 +209,7 @@ public class Tokenizer {
 		if (location == -1) return rawTokens;
 
 		while (location < len) {
-			locationEnd = string.indexOf(' ', location);	
+			locationEnd = string.indexOf(delimiter, location);	
 			if (locationEnd == -1) locationEnd = len;
 			rawTokens.add(string.substring(location, locationEnd));
 			location = locationEnd + 1;
