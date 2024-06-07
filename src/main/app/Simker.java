@@ -198,7 +198,8 @@ public class Simker {
 				return ;
 			}
 
-			todo("loading tasks from " + filePath.getStringValue() + "...");
+			loadTasks(filePath.getStringValue());
+			System.out.println("Loading tasks...");
 			break;	
 		}
 
