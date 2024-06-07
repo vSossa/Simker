@@ -248,7 +248,7 @@ public class Simker {
 			System.out.println("    mark <index> <status>                            mark the index-task with the given status");
 			System.out.println("    clear                                            clear screen");
 			System.out.println("    ls                                               list tasks");
-			System.out.println("    reset                                            equivalent to 'rm --all'");
+			System.out.println("    reset                                            equivalent to 'rm --all' and 'rm -a'");
 			System.out.println("    rm <-a | --all | index | indexBegin indexEnd>    remove index-task or all or all of the tasks between indexBegin and indexEnd, inclusive");
 			System.out.println("    quit [-o <fileName.csv>]                         quit Simker and, optinally saves the tasks in a csv file ");
 			System.out.println("    help [-v | --verbose]                            show this message");
