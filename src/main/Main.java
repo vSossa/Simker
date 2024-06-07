@@ -7,12 +7,17 @@ public class Main {
 		Simker app = new Simker();
 
 		if (args.length == 1) {
-			app.loadTasks(args[0]);
-			app.menu();
+			if (args[0].equals("-h") ||
+				args[0].equals("--help")) {	
+				System.out.println("Usage: ./build [filePath | -h | --help]");
+			} else {
+				app.loadTasks(args[0]);
+				app.menu();
+			}
 		} else if (args.length == 0) {
 			app.menu();
 		} else {
-			System.out.println("Usage: ./build <tasks.csv>");
+			System.out.println("Usage: ./build [tasks.csv | -h | --help]");
 			System.out.println();
 			System.out.println("ERROR: too many arguments");
 		}

@@ -385,10 +385,12 @@ public class Simker {
 	}
 
 	public int quit(ArrayList<Token> args) {
+		int returnStatus = 1;
 		switch (args.size()) {
 		case 1: {
 			System.out.println("Goodbye!");
-			return 0;
+			returnStatus = 0;
+			break;
 		}
 
 		case 2: {
@@ -397,8 +399,9 @@ public class Simker {
 				System.out.printf("%d: ERROR: expected COMMAND but got '%s'%n",
 								  arg.getIndex(),
 								  arg.getType());
-				return 1;
-			}
+				break;
+			} 
+
 			if (arg.getStringValue().equals("-o") || 
 				arg.getStringValue().equals("--output")) {
 				System.out.printf("%d: ERROR: missing file for '%s'%n",
@@ -418,35 +421,41 @@ public class Simker {
 				System.out.printf("%d: ERROR: expected COMMAND but got '%s'%n",
 								  subcommand.getIndex(),
 								  subcommand.getType());
-				return 1;
+				break;
 			}
 			if (!(subcommand.getStringValue().equals("-o") || 
 				subcommand.getStringValue().equals("--output"))) {
 				System.out.printf("%d: ERROR: unknow subcommand '%s'%n",
 								  subcommand.getIndex(),
 								  subcommand.getStringValue());
-				return 1;
+				break;
 			} 				
 
-			Token filePath = args.get(2);	
-			if (filePath.getType() != TokenType.STRING) {
+			Token file = args.get(2);	
+			if (file.getType() != TokenType.STRING) {
 				System.out.printf("%d: ERROR: expected STRING but got '%s'%n",
-								  filePath.getIndex(),
-								  filePath.getType());
-				return 1;
+								  file.getIndex(),
+								  file.getType());
+				break;
 			}
-			if (!filePath.getStringValue().endsWith(".csv")) {
+			if (!file.getStringValue().endsWith(".csv")) {
 				System.out.printf("%d: ERROR: expected a csv file but got '%s'%n",
-								  filePath.getIndex(),
-								  filePath.getStringValue());
-				return 1;
+								  file.getIndex(),
+								  file.getStringValue());
+				break;
 			}
 
-			saveTasks(filePath.getStringValue());
-			System.out.printf("Saving tasks into %s...%n",
-							  filePath.getStringValue());
-			System.out.println("Goodbye!");
-			return 0;
+			String filePath = file.getStringValue();
+			if (saveTasks(filePath)) { 
+				System.out.printf("Saving tasks into %s...%n",
+								  filePath);
+				System.out.println("Goodbye!");
+				returnStatus = 0;
+			} else {
+				System.out.printf("ERROR: could not write into the file: '%s'%n",
+								   filePath);
+			}
+			break;
 		}
 
 		default: {
@@ -456,49 +465,36 @@ public class Simker {
 		}
 		}
 
-		return 1;
+		return returnStatus;
 	}
 
-	private void saveTasks(String filePath) {
+	private boolean saveTasks(String filePath) {
+		boolean sucess = true;
 		Path file = Paths.get("./", filePath);	
 
 		if (Files.exists(file)) {
 			try {
 				Files.delete(file);
-			} catch (IOException delete) {
-				System.out.printf("ERROR: could not write into the file '%s'%n",
-								   filePath);
-				return ;
-			}
-
-			try {
 				Files.createFile(file);
-				writeFile(file);
-			} catch (IOException write) {
-				System.out.printf("ERROR: could not write into the file '%s'%n",
-								   filePath);
-				return ;
+				writeTasksIntoFile(file);
+			} catch (IOException e) {
+				sucess = false;
 			}
 		} else {
 			try {
 				Files.createFile(file);
+				writeTasksIntoFile(file);
 			} catch (IOException e) {
-				System.out.printf("ERROR: could not create the file '%s'%n",
+				System.out.printf("ERROR: could not write into the file: '%s'%n",
 								   filePath);
-				return ;
-			}
-
-			try {
-				writeFile(file);
-			} catch (IOException write) {
-				System.out.printf("ERROR: could not write into the file '%s'%n",
-								   filePath);
-				return ;
+				sucess = false;
 			}
 		}
+
+		return sucess;
  	}
 
-	private void writeFile(Path file) throws IOException {
+	private void writeTasksIntoFile(Path file) throws IOException {
 		for (Task task : this.tasks) {
 			if (task.getStatus() == Status.OPEN) {
 				if (task.getDescription().isEmpty()) {
