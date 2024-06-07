@@ -163,16 +163,37 @@ public class Simker {
 			break;
 		}
 
+		case "reset": {
+			resetTasks(tokens);
+			break;
+		}
+
 		default: {
 			System.out.printf("%d: ERROR: unknow command: %s%n", 
 							  op.getIndex(),
 							  op.getStringValue());
-			System.out.println("TIP: type 'h' or 'help' for help");
+			System.out.println("TIP: type 'help' for help");
 		}
 		}	
 
 		return returnStatus;
 	}
+
+	public void resetTasks(ArrayList<Token> args) {
+		switch (args.size()) {
+		case 1: {
+			System.out.println("Reseting...");
+			this.tasks.clear();
+			break;
+		}
+
+		default: {
+			System.out.printf("%d: ERROR: too many arguments for '%s'%n",
+							  args.get(0).getIndex(),
+							  args.get(0).getStringValue());
+		}
+		}
+	} 
 
 	public void loadTasks(ArrayList<Token> args) {
 		switch (args.size()) {
@@ -227,6 +248,7 @@ public class Simker {
 			System.out.println("    mark <index> <status>                            mark the index-task with the given status");
 			System.out.println("    clear                                            clear screen");
 			System.out.println("    ls                                               list tasks");
+			System.out.println("    reset                                            equivalent to 'rm --all'");
 			System.out.println("    rm <-a | --all | index | indexBegin indexEnd>    remove index-task or all or all of the tasks between indexBegin and indexEnd, inclusive");
 			System.out.println("    quit [-o <fileName.csv>]                         quit Simker and, optinally saves the tasks in a csv file ");
 			System.out.println("    help [-v | --verbose]                            show this message");
