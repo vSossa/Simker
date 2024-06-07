@@ -609,8 +609,10 @@ public class Simker {
 
 		System.out.printf("Removing all tasks between %d and %d%n",
 						  i, j);
+
+		int start = i;
 		while (i <= j) {
-			this.tasks.remove(i);
+			this.tasks.remove(start);
 			++i;	
 		}
 	}
