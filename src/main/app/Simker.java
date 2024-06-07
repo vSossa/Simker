@@ -33,26 +33,16 @@ public class Simker {
 			System.exit(1);
 		} 
 
-		for (int i = 0; i < lines.size(); ++i) {
+		for (String line : lines) {
 			Status s = null;
 			String name = "";
 			String description = "";
 
-			ArrayList<String> taskComponents = Tokenizer.splitString(lines.get(i), ',');
+			ArrayList<String> taskComponents = Tokenizer.splitString(line, ',');
 			int len = taskComponents.size();
-			String statusCode = taskComponents.get(0);
-			if (statusCode.equals("0")) {
-				s = Status.OPEN;
-			} else if (statusCode.equals("1")) {
-				s = Status.IN_PROGRESS;
-			} else if (statusCode.equals("2")) {
-				s = Status.CLOSED;
-			} else {
-				System.out.printf("%d: ERROR: invalid status code %s%n",
-								  i, statusCode);
-				System.exit(1);
-			}
-			
+			String statusValue = taskComponents.get(0);
+			s = statusValueToStatus(Integer.parseInt(statusValue));
+
 			int j = 1;
 			name = taskComponents.get(j);
 			while (Tokenizer.count(name, "\"", 0) < 2) { 
@@ -122,7 +112,7 @@ public class Simker {
 		if (tokens == null) return returnStatus;
 		
 		Token op = tokens.get(0);
-		switch (op.getStringValue()) {
+		switch (op.value()) {
 		case "add": {
 			addTask(tokens);	
 			break;
@@ -170,8 +160,8 @@ public class Simker {
 
 		default: {
 			System.out.printf("%d: ERROR: unknow command: %s%n", 
-							  op.getIndex(),
-							  op.getStringValue());
+							  op.index(),
+							  op.value());
 			System.out.println("TIP: type 'help' for help");
 		}
 		}	
@@ -189,8 +179,8 @@ public class Simker {
 
 		default: {
 			System.out.printf("%d: ERROR: too many arguments for '%s'%n",
-							  args.get(0).getIndex(),
-							  args.get(0).getStringValue());
+							  args.get(0).index(),
+							  args.get(0).value());
 		}
 		}
 	} 
@@ -199,34 +189,34 @@ public class Simker {
 		switch (args.size()) {
 		case 1: {
 			System.out.printf("%d: ERROR: missing file path for '%s' command%n",
-							  args.get(0).getIndex(),
-						      args.get(0).getStringValue());
+							  args.get(0).index(),
+						      args.get(0).value());
 			break;
 		}
 
 		case 2: {
 		    Token filePath = args.get(1);
-			if (filePath.getType() != TokenType.STRING) {
+			if (filePath.type() != TokenType.STRING) {
 				System.out.printf("%d: ERROR: expected STRING but got '%s'%n",
-								  filePath.getIndex(),
-								  filePath.getStringValue());
+								  filePath.index(),
+								  filePath.value());
 				return ;
 			}
-			if (!filePath.getStringValue().endsWith(".csv")) {
+			if (!filePath.value().endsWith(".csv")) {
 				System.out.printf("%d: ERROR: expected a csv file: '%s'%n",
-								  filePath.getIndex(),
-								  filePath.getStringValue());
+								  filePath.index(),
+								  filePath.value());
 				return ;
 			}
 
-			loadTasks(filePath.getStringValue());
+			loadTasks(filePath.value());
 			System.out.println("Loading tasks...");
 			break;	
 		}
 
 		default: {
 			System.out.printf("ERROR: too many arguments for '%s'%n",
-							  args.get(0).getStringValue());
+							  args.get(0).value());
 		}
 		}
 	}
@@ -236,7 +226,7 @@ public class Simker {
 			System.out.printf("\033[H\033[J");
 		} else {
 			System.out.printf("ERROR: too many arguments for '%s'%n",
-							  args.get(0).getStringValue());
+							  args.get(0).value());
 		}
 	}
 
@@ -257,20 +247,20 @@ public class Simker {
 
 		case 2: {
 			Token subcommand = args.get(1);
-			if (subcommand.getStringValue().equals("-v") || 
-				subcommand.getStringValue().equals("--verbose")) {
+			if (subcommand.value().equals("-v") || 
+				subcommand.value().equals("--verbose")) {
 				todo("verbose usage message");
 			} else {
 				System.out.printf("%d: ERROR: unknow subcommand '%s'%n",
-								  subcommand.getIndex(),
-								  subcommand.getStringValue());
+								  subcommand.index(),
+								  subcommand.value());
 			}
 			break;
 		}
 
 		default: {
 			System.out.printf("ERROR: too many arguments for '%s'%n",
-							  args.get(0).getStringValue());
+							  args.get(0).value());
 		}	
 		}
 	}
@@ -279,7 +269,7 @@ public class Simker {
 		switch (args.size()) {
 		case 1: {
 			System.out.printf("ERROR: not enough arguments for '%s'%n",
-							  args.get(0).getStringValue());
+							  args.get(0).value());
 			break;
 		}
 
@@ -296,7 +286,7 @@ public class Simker {
 
 		default: {
 			System.out.printf("ERROR: too many arguments for '%s'%n",
-							  args.get(0).getStringValue());
+							  args.get(0).value());
 		}
 		}
 	}
@@ -305,20 +295,20 @@ public class Simker {
 		switch (args.size()) {
 		case 1: {
 			System.out.printf("ERROR: not enough arguments for '%s'%n",
-							  args.get(0).getStringValue());
+							  args.get(0).value());
 			break;
 		}
 
 		case 2: {
 			Token t = args.get(1);
-			if (t.getType() != TokenType.STRING) {
+			if (t.type() != TokenType.STRING) {
 				System.out.printf("%d: ERROR: expected STRING but got: '%s'%n",
-								  t.getIndex(),
-								  t.getType());
+								  t.index(),
+								  t.type());
 				return ;
 			} 
 
-			String name = t.getStringValue();
+			String name = t.value();
 			if (Tokenizer.stripLeft(name, " ", 0) == -1) {
 				System.out.println("ERROR: a task must have at least one character");
 				return ;
@@ -331,26 +321,26 @@ public class Simker {
 		case 3: {
 			Token t1 = args.get(1);
 			Token t2 = args.get(2);
-			if (t1.getType() != TokenType.STRING ) {
+			if (t1.type() != TokenType.STRING ) {
 				System.out.printf("%d: ERROR: expected STRING but got: '%s'%n",
-								  t1.getIndex(),
-								  t1.getType());
+								  t1.index(),
+								  t1.type());
 				return ;
 			} 
-			if (t2.getType() != TokenType.STRING) {
+			if (t2.type() != TokenType.STRING) {
 				System.out.printf("%d: ERROR: expected STRING but got: '%s'%n",
-								  t2.getIndex(),
-								  t2.getType());
+								  t2.index(),
+								  t2.type());
 				return ;
 			} 
 
-			String name = t1.getStringValue();
+			String name = t1.value();
 			if (Tokenizer.stripLeft(name, " ", 0) == -1) {
 				System.out.println("ERROR: a task must have at least one character");
 				return ;
 			}
 
-			String description = t2.getStringValue();
+			String description = t2.value();
 			if (Tokenizer.stripLeft(name, " ", 0) == -1) { 
 				this.tasks.add( new Task(name) );	
 			} else {
@@ -361,7 +351,7 @@ public class Simker {
 
 		default: {
 			System.out.printf("ERROR: too many arguments for '%s'%n",
-							   args.get(0).getStringValue());
+							   args.get(0).value());
 		}
 		}
 	}
@@ -370,7 +360,7 @@ public class Simker {
 		switch (args.size()) {
 		case 1: case 2: {
 			System.out.printf("ERROR: missing arguments for '%s'%n",
-							  args.get(0).getStringValue());
+							  args.get(0).value());
 			break;
 		}
 
@@ -382,7 +372,7 @@ public class Simker {
 
 		default: {
 			System.out.printf("ERROR: too many arguments for '%s'%n",
-							  args.get(0).getStringValue());
+							  args.get(0).value());
 		}
 		}
 	}
@@ -402,7 +392,7 @@ public class Simker {
 		
 		default: {
 			System.out.printf("ERROR: too many arguments for '%s'%n",
-							  args.get(0).getStringValue());
+							  args.get(0).value());
 		}
 		}
 	}
@@ -418,57 +408,57 @@ public class Simker {
 
 		case 2: {
 			Token arg = args.get(1);
-			if (arg.getType() != TokenType.COMMAND) {
+			if (arg.type() != TokenType.COMMAND) {
 				System.out.printf("%d: ERROR: expected COMMAND but got '%s'%n",
-								  arg.getIndex(),
-								  arg.getType());
+								  arg.index(),
+								  arg.type());
 				break;
 			} 
 
-			if (arg.getStringValue().equals("-o") || 
-				arg.getStringValue().equals("--output")) {
+			if (arg.value().equals("-o") || 
+				arg.value().equals("--output")) {
 				System.out.printf("%d: ERROR: missing file for '%s'%n",
-								  arg.getIndex(),
-								  arg.getStringValue());
+								  arg.index(),
+								  arg.value());
 			} else {
 				System.out.printf("%d: ERROR: unknow subcommand '%s'%n",
-								  arg.getIndex(),
-								  arg.getStringValue());
+								  arg.index(),
+								  arg.value());
 			}
 			break;
 		}
 
 		case 3: {
 			Token subcommand = args.get(1);
-			if (subcommand.getType() != TokenType.COMMAND) {
+			if (subcommand.type() != TokenType.COMMAND) {
 				System.out.printf("%d: ERROR: expected COMMAND but got '%s'%n",
-								  subcommand.getIndex(),
-								  subcommand.getType());
+								  subcommand.index(),
+								  subcommand.type());
 				break;
 			}
-			if (!(subcommand.getStringValue().equals("-o") || 
-				subcommand.getStringValue().equals("--output"))) {
+			if (!(subcommand.value().equals("-o") || 
+				subcommand.value().equals("--output"))) {
 				System.out.printf("%d: ERROR: unknow subcommand '%s'%n",
-								  subcommand.getIndex(),
-								  subcommand.getStringValue());
+								  subcommand.index(),
+								  subcommand.value());
 				break;
 			} 				
 
 			Token file = args.get(2);	
-			if (file.getType() != TokenType.STRING) {
+			if (file.type() != TokenType.STRING) {
 				System.out.printf("%d: ERROR: expected STRING but got '%s'%n",
-								  file.getIndex(),
-								  file.getType());
+								  file.index(),
+								  file.type());
 				break;
 			}
-			if (!file.getStringValue().endsWith(".csv")) {
+			if (!file.value().endsWith(".csv")) {
 				System.out.printf("%d: ERROR: expected a csv file but got '%s'%n",
-								  file.getIndex(),
-								  file.getStringValue());
+								  file.index(),
+								  file.value());
 				break;
 			}
 
-			String filePath = file.getStringValue();
+			String filePath = file.value();
 			if (saveTasks(filePath)) { 
 				System.out.printf("Saving tasks into %s...%n",
 								  filePath);
@@ -483,8 +473,8 @@ public class Simker {
 
 		default: {
 			System.out.printf("%d: ERROR: too many arguments for '%s' command%n",
-							  args.get(1).getIndex(),
-						      args.get(1).getStringValue());
+							  args.get(1).index(),
+						      args.get(1).value());
 		}
 		}
 
@@ -519,47 +509,19 @@ public class Simker {
 
 	private void writeTasksIntoFile(Path file) throws IOException {
 		for (Task task : this.tasks) {
-			if (task.getStatus() == Status.OPEN) {
-				if (task.getDescription().isEmpty()) {
-					Files.writeString(file, 
-									  String.format("0,\"%s\",\"\"\n", task.getName()),
-									  StandardOpenOption.APPEND);			
-				} else {
-					Files.writeString(file, 
-									  String.format("0,\"%s\",\"%s\"\n", task.getName(), task.getDescription()),
-									  StandardOpenOption.APPEND);			
-				}
-			} else if (task.getStatus() == Status.IN_PROGRESS) {
-				if (task.getDescription().isEmpty()) {
-					Files.writeString(file, 
-									  String.format("1,\"%s\",\"\"\n", task.getName()),
-									  StandardOpenOption.APPEND);			
-				} else {
-					Files.writeString(file, 
-									  String.format("1,\"%s\",\"%s\"\n", task.getName(), task.getDescription()),
-									  StandardOpenOption.APPEND);			
-				}
-			} else {
-				if (task.getDescription().isEmpty()) {
-					Files.writeString(file, 
-									  String.format("2,\"%s\",\"\"\n", task.getName()),
-									  StandardOpenOption.APPEND);			
-				} else {
-					Files.writeString(file, 
-									  String.format("2,\"%s\",\"%s\"\n", task.getName(), task.getDescription()),
-									  StandardOpenOption.APPEND);			
-				}
-			}
+			Files.writeString(file, 
+							  task.saveAsCSV(),
+							  StandardOpenOption.APPEND);			
 		}
 	}
 
 	private void removeTask(Token arg) {
-		switch (arg.getType()) {
+		switch (arg.type()) {
 		case INT: {
-			int index = Integer.parseInt(arg.getStringValue());
+			int index = Integer.parseInt(arg.value());
 			if (isOutOfBounds(index)) {
 				System.out.printf("%d: ERROR: %d is out of bounds%n",
-								  arg.getIndex(),
+								  arg.index(),
 								  index);
 				return ;
 			}
@@ -571,54 +533,54 @@ public class Simker {
 		}
 
 		case COMMAND: {
-			if (arg.getStringValue().equals("--all") ||
-				arg.getStringValue().equals("-a")) {
+			if (arg.value().equals("--all") ||
+				arg.value().equals("-a")) {
 				System.out.printf("Removing all tasks...%n");
 				this.tasks.clear();
 			} else {
 				System.out.printf("%d: ERROR: unknow subcommand: '%s'%n",
-								  arg.getIndex(), 
-								  arg.getStringValue());
+								  arg.index(), 
+								  arg.value());
 			}
 			break;
 		} 
 
 		default: {
 			System.out.printf("%d: ERROR: unknow subcommand: '%s'%n",
-						      arg.getIndex(),
-							  arg.getStringValue());
+						      arg.index(),
+							  arg.value());
 		}
 		}
 	} 
 
 	private void removeTaskRange(Token indexStart, Token indexEnd) {
-		if (indexStart.getType() != TokenType.INT) {
+		if (indexStart.type() != TokenType.INT) {
 			System.out.printf("%d: ERROR: expected INT but got: %s%n", 
-							  indexStart.getIndex(),
-							  indexStart.getStringValue()); 
+							  indexStart.index(),
+							  indexStart.value()); 
 			return ;
 		}	
 
-		if (indexEnd.getType() != TokenType.INT) {
+		if (indexEnd.type() != TokenType.INT) {
 			System.out.printf("%d: ERROR: expected INT but got: %s%n", 
-							  indexEnd.getIndex(),
-							  indexEnd.getStringValue()); 
+							  indexEnd.index(),
+							  indexEnd.value()); 
 			return ;
 		}
 
 		int i, j;	
-		i = Integer.parseInt(indexStart.getStringValue());
+		i = Integer.parseInt(indexStart.value());
 		if (isOutOfBounds(i)) {
 			System.out.printf("%d: ERROR: %d is out of bounds%n", 
-							  indexStart.getIndex(),
+							  indexStart.index(),
 							  i); 
 			return ;
 		}
 
-		j = Integer.parseInt(indexEnd.getStringValue());
+		j = Integer.parseInt(indexEnd.value());
 		if (isOutOfBounds(j)) {
 			System.out.printf("%d: ERROR: %d is out of bounds%n", 
-							  indexEnd.getIndex(),
+							  indexEnd.index(),
 							  j); 
 			return ;
 		}
@@ -640,28 +602,28 @@ public class Simker {
 	}
 
 	private void markTask(Token index, Token status) {
-		if (index.getType() != TokenType.INT) {
+		if (index.type() != TokenType.INT) {
 			System.out.printf("%d: ERROR: expected INT but got: %s%n",
-							  index.getIndex(),
-							  index.getType());
+							  index.index(),
+							  index.type());
 			return ;
 		} 
 
-		int i = Integer.parseInt(index.getStringValue());
+		int i = Integer.parseInt(index.value());
 		if (isOutOfBounds(i)) {
 			System.out.printf("%d: ERROR: '%d' is out of bounds%n",
-							  index.getIndex(),
+							  index.index(),
 							  i);
 			return ;
 		} 	
 
-		switch (status.getType()) {
+		switch (status.type()) {
 		case INT: {
-			int statusValue = Integer.parseInt(status.getStringValue());
+			int statusValue = Integer.parseInt(status.value());
 			Status s = statusValueToStatus(statusValue);
 			if (s == null) {
 				System.out.printf("%d: ERROR: invalid status code: '%s'%n",
-								  status.getIndex(),
+								  status.index(),
 								  statusValue);
 			} else {
 				Task t = this.tasks.get(i);
@@ -672,11 +634,11 @@ public class Simker {
 		}
 
 		case COMMAND: {
-			String statusString = status.getStringValue();
+			String statusString = status.value();
 			Status s = statusStringToStatus(statusString);
 			if (s == null) {
 				System.out.printf("%d: ERROR: invalid subcommand: '%s'%n",
-								  status.getIndex(),
+								  status.index(),
 								  statusString);
 			} else {
 				Task t = this.tasks.get(i);
@@ -688,8 +650,8 @@ public class Simker {
 
 		default: {
 			System.out.printf("%d: ERROR: expected COMMAND or INT: %s%n",
-							  status.getIndex(),
-							  status.getType());
+							  status.index(),
+							  status.type());
 		}
 		}
 	}

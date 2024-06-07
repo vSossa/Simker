@@ -33,11 +33,45 @@ public class Task {
 		this.description = "";
 	}
 
-	public Status getStatus()      { return this.status; }
-	public String getName()        { return this.name; }
-	public String getDescription() { return this.description; }
+	public Status status()      { return this.status; }
+	public String name()        { return this.name; }
+	public String description() { return this.description; }
 
 	public void setStatus(Status s) { this.status = s; }
+
+	public String saveAsCSV() {
+		String s;
+		if (this.status == Status.OPEN) { 
+			if (this.description.isEmpty()) {
+				s = String.format("0,\"%s\",\"\"\n", 
+								  this.name);
+			} else {
+				s = String.format("0,\"%s\",\"%s\"\n", 	
+								  this.name, 
+								  this.description);
+			}
+		} else if (this.status == Status.IN_PROGRESS) {
+			if (this.description.isEmpty()) {
+				s = String.format("1,\"%s\",\"\"\n", 
+								  this.name);
+			} else {
+				s = String.format("1,\"%s\",\"%s\"\n", 	
+								  this.name, 
+								  this.description);
+			}
+		} else {
+			if (this.description.isEmpty()) {
+				s = String.format("2,\"%s\",\"\"\n", 
+								  this.name);
+			} else {
+				s = String.format("2,\"%s\",\"%s\"\n", 	
+								  this.name, 
+								  this.description);
+			}
+		}
+
+		return s;
+	}
 
 	@Override 
 	public String toString() {

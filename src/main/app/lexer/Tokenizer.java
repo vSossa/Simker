@@ -19,11 +19,11 @@ public class Tokenizer {
 			// "STRING"
 			if (count(rawToken, "\"", 0) >= 1) { 
 				TokenType type = TokenType.STRING;
-				String stringValue = rawToken;	
+				String value = rawToken;	
 				int endIndex;
 
 				// string
-				if (count(stringValue, "\"", 0) > 1) {
+				if (count(value, "\"", 0) > 1) {
 					endIndex = index;
 			
 				// ...string...
@@ -31,48 +31,48 @@ public class Tokenizer {
 					endIndex = index;
 					do {
 						++endIndex;
-						stringValue = (endIndex == LEN_RAW_TOKENS) ?
-								stringValue :
-								stringValue.concat(" ").concat(rawTokens.get(endIndex));
+						value = (endIndex == LEN_RAW_TOKENS) ?
+								value :
+								value.concat(" ").concat(rawTokens.get(endIndex));
 					} while (endIndex < LEN_RAW_TOKENS && 
-							 count(stringValue, "\"", 0) < 2);
+							 count(value, "\"", 0) < 2);
 				}
 
 				// correcting index for error messaging  
 				if (endIndex == LEN_RAW_TOKENS) endIndex--;
 
-				int countStringDelimiter = count(stringValue, "\"", 0);
-				if (!stringValue.endsWith("\"") && countStringDelimiter >= 2) {
+				int countStringDelimiter = count(value, "\"", 0);
+				if (!value.endsWith("\"") && countStringDelimiter >= 2) {
 					System.out.printf("%d: ERROR: invalid start of command%n",
 									  index);
 					return null;
 				} 
 
-				if (!stringValue.endsWith("\"") || 
-					(stringValue.endsWith("\"") && stringValue.length() == 1) ||
-					!stringValue.startsWith("\"")) {
+				if (!value.endsWith("\"") || 
+					(value.endsWith("\"") && value.length() == 1) ||
+					!value.startsWith("\"")) {
 					System.out.printf("%d: ERROR: unclosed string literal%n",
 									  index);
 					return null;
 				} 
 
-				if (stringValue.endsWith("\"") && countStringDelimiter > 2) {
+				if (value.endsWith("\"") && countStringDelimiter > 2) {
 					System.out.printf("%d: ERROR: invalid string literal%n",
 									  index);
 					return null;
 				}
 
-				tokens.add( new Token(endIndex, type, stringValue.replace("\"", "")) );
+				tokens.add( new Token(endIndex, type, value.replace("\"", "")) );
 				index = endIndex + 1;	
 	
 			// 'STRING'
 			} else if (count(rawToken, "\'", 0) >= 1) {
 				TokenType type = TokenType.STRING;
-				String stringValue = rawToken;	
+				String value = rawToken;	
 				int endIndex;
 
 				// string
-				if (count(stringValue, "\'", 0) > 1) {
+				if (count(value, "\'", 0) > 1) {
 					endIndex = index;
 			
 				// ...string...
@@ -80,38 +80,38 @@ public class Tokenizer {
 					endIndex = index;
 					do {
 						++endIndex;
-						stringValue = (endIndex == LEN_RAW_TOKENS) ?
-								stringValue :
-								stringValue.concat(" ").concat(rawTokens.get(endIndex));
+						value = (endIndex == LEN_RAW_TOKENS) ?
+								value :
+								value.concat(" ").concat(rawTokens.get(endIndex));
 					} while (endIndex < LEN_RAW_TOKENS && 
-							 count(stringValue, "\'", 0) < 2);
+							 count(value, "\'", 0) < 2);
 				}
 
 				// correcting index for error messaging  
 				if (endIndex == LEN_RAW_TOKENS) endIndex--;
 
-				int countStringDelimiter = count(stringValue, "\'", 0);
-				if (!stringValue.endsWith("\'") && countStringDelimiter >= 2) {
+				int countStringDelimiter = count(value, "\'", 0);
+				if (!value.endsWith("\'") && countStringDelimiter >= 2) {
 					System.out.printf("%d: ERROR: invalid start of command%n",
 									  index);
 					return null;
 				} 
 
-				if (!stringValue.endsWith("\'") || 
-					(stringValue.endsWith("\'") && stringValue.length() == 1) ||
-					!stringValue.startsWith("\'")) {
+				if (!value.endsWith("\'") || 
+					(value.endsWith("\'") && value.length() == 1) ||
+					!value.startsWith("\'")) {
 					System.out.printf("%d: ERROR: unclosed string literal%n",
 									  index);
 					return null;
 				} 
 
-				if (stringValue.endsWith("\'") && countStringDelimiter > 2) {
+				if (value.endsWith("\'") && countStringDelimiter > 2) {
 					System.out.printf("%d: ERROR: invalid string literal%n",
 									  index);
 					return null;
 				}
 
-				tokens.add( new Token(endIndex, type, stringValue.replace("\'", "")) );
+				tokens.add( new Token(endIndex, type, value.replace("\'", "")) );
 				index = endIndex + 1;	
 
 			// WHITESPACE
