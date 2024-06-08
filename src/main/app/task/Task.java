@@ -39,7 +39,7 @@ public class Task {
 
 	public void setStatus(Status s) { this.status = s; }
 
-	public String saveAsCSV() {
+	public String toCSVFormat() {
 		String s;
 		if (this.status == Status.OPEN) { 
 			if (this.description.isEmpty()) {

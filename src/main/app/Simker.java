@@ -6,8 +6,8 @@ import main.app.lexer.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.Files;
-import java.io.IOException;
 import java.nio.file.StandardOpenOption;
+import java.io.IOException;
 import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
@@ -200,13 +200,13 @@ public class Simker {
 				System.out.printf("%d: ERROR: expected STRING but got '%s'%n",
 								  filePath.index(),
 								  filePath.value());
-				return ;
+				break;
 			}
 			if (!filePath.value().endsWith(".csv")) {
 				System.out.printf("%d: ERROR: expected a csv file: '%s'%n",
 								  filePath.index(),
 								  filePath.value());
-				return ;
+				break;
 			}
 
 			loadTasks(filePath.value());
@@ -240,21 +240,8 @@ public class Simker {
 			System.out.println("    ls                                               list tasks");
 			System.out.println("    reset                                            equivalent to 'rm --all' and 'rm -a'");
 			System.out.println("    rm <-a | --all | index | indexBegin indexEnd>    remove index-task or all or all of the tasks between indexBegin and indexEnd, inclusive");
-			System.out.println("    quit [-o <fileName.csv>]                         quit Simker and, optinally saves the tasks in a csv file ");
-			System.out.println("    help [-v | --verbose]                            show this message");
-			break;
-		}
-
-		case 2: {
-			Token subcommand = args.get(1);
-			if (subcommand.value().equals("-v") || 
-				subcommand.value().equals("--verbose")) {
-				todo("verbose usage message");
-			} else {
-				System.out.printf("%d: ERROR: unknow subcommand '%s'%n",
-								  subcommand.index(),
-								  subcommand.value());
-			}
+			System.out.println("    quit [-o <fileName.csv>]                         quit Simker and, optinally, saves the tasks in a csv file ");
+			System.out.println("    help                                             show this message");
 			break;
 		}
 
@@ -305,13 +292,13 @@ public class Simker {
 				System.out.printf("%d: ERROR: expected STRING but got: '%s'%n",
 								  t.index(),
 								  t.type());
-				return ;
+				break;
 			} 
 
 			String name = t.value();
 			if (Tokenizer.stripLeft(name, " ", 0) == -1) {
 				System.out.println("ERROR: a task must have at least one character");
-				return ;
+				break;
 			}
 
 			this.tasks.add( new Task(name) );	
@@ -325,19 +312,19 @@ public class Simker {
 				System.out.printf("%d: ERROR: expected STRING but got: '%s'%n",
 								  t1.index(),
 								  t1.type());
-				return ;
+				break;
 			} 
 			if (t2.type() != TokenType.STRING) {
 				System.out.printf("%d: ERROR: expected STRING but got: '%s'%n",
 								  t2.index(),
 								  t2.type());
-				return ;
+				break;
 			} 
 
 			String name = t1.value();
 			if (Tokenizer.stripLeft(name, " ", 0) == -1) {
 				System.out.println("ERROR: a task must have at least one character");
-				return ;
+				break;
 			}
 
 			String description = t2.value();
@@ -498,8 +485,6 @@ public class Simker {
 				Files.createFile(file);
 				writeTasksIntoFile(file);
 			} catch (IOException e) {
-				System.out.printf("ERROR: could not write into the file: '%s'%n",
-								   filePath);
 				sucess = false;
 			}
 		}
@@ -510,8 +495,8 @@ public class Simker {
 	private void writeTasksIntoFile(Path file) throws IOException {
 		for (Task task : this.tasks) {
 			Files.writeString(file, 
-							  task.saveAsCSV(),
-							  StandardOpenOption.APPEND);			
+							  task.toCSVFormat(),
+							  StandardOpenOption.APPEND);	
 		}
 	}
 
@@ -523,7 +508,7 @@ public class Simker {
 				System.out.printf("%d: ERROR: %d is out of bounds%n",
 								  arg.index(),
 								  index);
-				return ;
+				break;
 			}
 
 			System.out.printf("Removing %d-task...%n",
