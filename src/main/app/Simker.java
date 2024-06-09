@@ -240,14 +240,14 @@ public class Simker {
 		case 1: {
 			System.out.println("COMMANDS:");
 			System.out.println("    add <name> [description]                         add a new task");
-			System.out.println("    mark <index> <status>                            mark the index-task with the given status");
-			System.out.println("    clear                                            clear screen");
-			System.out.println("    ls                                               list tasks");
-			System.out.println("    reset                                            alias for `rm --all` and `rm -a`");
+			System.out.println("    mark <index> <status>                            mark the index-task with the given status, which is given by 0, 1 or 2, or -o (--open), -i (--in-progress) or -c (--closed)");
 			System.out.println("    rm <-a | --all | index | indexBegin indexEnd>    remove index-task or all or all of the tasks between indexBegin and indexEnd, inclusive");
 			System.out.println("    save [-o <file.csv> | --output <file.csv>]       save tasks into a csv file");
 			System.out.println("    exit [-o <file.csv> | --output <file.csv>]       alias for `quit` command");
 			System.out.println("    quit [-o <file.csv> | --output <file.csv>]       quit Simker and, optinally, saves the tasks in a csv file ");
+			System.out.println("    clear                                            clear screen");
+			System.out.println("    ls                                               list tasks");
+			System.out.println("    reset                                            alias for `rm --all` and `rm -a`");
 			System.out.println("    help                                             show this message");
 			break;
 		}
@@ -549,9 +549,10 @@ public class Simker {
 		}
 
 		default: {
+			Token t = args.get(0);
 			System.out.printf("%d: ERROR: too many arguments for `%s` command%n",
-							  args.get(0).index(),
-							  args.get(0).value());
+							  t.index(),
+							  t.value());
 		}
 		}
 	}
