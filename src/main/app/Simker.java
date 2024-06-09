@@ -133,7 +133,7 @@ public class Simker {
 			break;
 		}
 
-		case "quit": {
+		case "exit": case "quit": {
 			returnStatus = quit(tokens);
 			break;
 		}
@@ -150,6 +150,11 @@ public class Simker {
 
 		case "rm": {
 			removeTasks(tokens);
+			break;
+		}
+
+		case "save": {
+			saveTasks(tokens);
 			break;
 		}
 
@@ -238,8 +243,10 @@ public class Simker {
 			System.out.println("    mark <index> <status>                            mark the index-task with the given status");
 			System.out.println("    clear                                            clear screen");
 			System.out.println("    ls                                               list tasks");
-			System.out.println("    reset                                            equivalent to 'rm --all' and 'rm -a'");
+			System.out.println("    reset                                            alias for `rm --all` and `rm -a`");
 			System.out.println("    rm <-a | --all | index | indexBegin indexEnd>    remove index-task or all or all of the tasks between indexBegin and indexEnd, inclusive");
+			System.out.println("    save <fileName.csv>                              save tasks into a csv file");
+			System.out.println("    exit [-o <fileName.csv>]                         alias for `quit` command");
 			System.out.println("    quit [-o <fileName.csv>]                         quit Simker and, optinally, saves the tasks in a csv file ");
 			System.out.println("    help                                             show this message");
 			break;
@@ -466,6 +473,49 @@ public class Simker {
 		}
 
 		return returnStatus;
+	}
+
+	public void saveTasks(ArrayList<Token> args) {
+		switch (args.size()) {
+		case 1: {
+			System.out.printf("%d: ERROR: missing file name for `%s` command%n",
+							  args.get(0).index(),
+							  args.get(0).value());
+			break;
+		}
+
+		case 2: {
+			Token file = args.get(1);	
+			if (file.type() != TokenType.STRING) {
+				System.out.printf("%d: ERROR: expected STRING but got '%s'%n",
+								  file.index(),
+								  file.type());
+				break;
+			}
+			if (!file.value().endsWith(".csv")) {
+				System.out.printf("%d: ERROR: expected a csv file but got '%s'%n",
+								  file.index(),
+								  file.value());
+				break;
+			}
+
+			if (saveTasks(file.value())) { 
+				System.out.printf("Saving tasks into %s...%n",
+								  file.value());
+			} else {
+				System.out.printf("%d: ERROR: could not write into file: '%s'%n",
+								   file.index(),
+								   file.value());
+			}
+			break;
+		}
+
+		default: {
+			System.out.printf("%d: ERROR: too many arguments for `%s` command%n",
+							  args.get(0).index(),
+							  args.get(0).value());
+		}
+		}
 	}
 
 	private boolean saveTasks(String filePath) {
