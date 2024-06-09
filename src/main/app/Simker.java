@@ -245,9 +245,9 @@ public class Simker {
 			System.out.println("    ls                                               list tasks");
 			System.out.println("    reset                                            alias for `rm --all` and `rm -a`");
 			System.out.println("    rm <-a | --all | index | indexBegin indexEnd>    remove index-task or all or all of the tasks between indexBegin and indexEnd, inclusive");
-			System.out.println("    save <fileName.csv>                              save tasks into a csv file");
-			System.out.println("    exit [-o <fileName.csv>]                         alias for `quit` command");
-			System.out.println("    quit [-o <fileName.csv>]                         quit Simker and, optinally, saves the tasks in a csv file ");
+			System.out.println("    save [-o <file.csv> | --output <file.csv>]       save tasks into a csv file");
+			System.out.println("    exit [-o <file.csv> | --output <file.csv>]       alias for `quit` command");
+			System.out.println("    quit [-o <file.csv> | --output <file.csv>]       quit Simker and, optinally, saves the tasks in a csv file ");
 			System.out.println("    help                                             show this message");
 			break;
 		}
@@ -478,14 +478,52 @@ public class Simker {
 	public void saveTasks(ArrayList<Token> args) {
 		switch (args.size()) {
 		case 1: {
-			System.out.printf("%d: ERROR: missing file name for `%s` command%n",
-							  args.get(0).index(),
-							  args.get(0).value());
+			if (saveTasks("tasks.csv")) { 
+				System.out.printf("Saving tasks...%n");
+			} else {
+				System.out.printf("ERROR: could not save tasks%n");
+			}
 			break;
 		}
 
 		case 2: {
-			Token file = args.get(1);	
+			Token t = args.get(1);
+			if (t.type() != TokenType.COMMAND) {
+				System.out.printf("%d: ERROR: expected COMMAND but got `%s`%n",
+								  t.index(),
+								  t.type());
+				break;
+			}
+
+			if (t.value().equals("-o") ||
+				t.value().equals("--output")) {
+				System.out.printf("%d: ERROR: missing file path%n");
+			} else { 
+				System.out.printf("%d: ERROR: unknow subcommand `%s`%n",
+								  t.index(),
+								  t.value());
+			}
+			break;
+		}
+
+		case 3: {
+			Token subcommand = args.get(1);
+			if (subcommand.type() != TokenType.COMMAND) {
+				System.out.printf("%d: ERROR: expected COMMAND but got `%s`%n",
+								  subcommand.index(),
+								  subcommand.value());
+				break;
+			}
+
+			if (!subcommand.equals("-o") &&
+				!subcommand.equals("--output")) {
+				System.out.printf("%d: ERROR: unknow subcommand `%s`%n",
+								  subcommand.index(),
+								  subcommand.value());
+				break;
+			} 			
+
+			Token file = args.get(2);	
 			if (file.type() != TokenType.STRING) {
 				System.out.printf("%d: ERROR: expected STRING but got '%s'%n",
 								  file.index(),
