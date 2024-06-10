@@ -17,7 +17,7 @@ $ java main.Main [tasks.csv]
 ```
 
 The csv file has the format:
-|<status>|<name>|[description]|
+|\<status\>|\<name\>|[description]|
 |--------|------|-------------|
 |0|"teste"|""|
 
