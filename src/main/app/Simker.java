@@ -239,16 +239,18 @@ public class Simker {
 		switch (args.size()) {
 		case 1: {
 			System.out.println("COMMANDS:");
-			System.out.println("    add <name> [description]                         add a new task");
-			System.out.println("    mark <index> <status>                            mark the index-task with the given status, which is given by 0, 1 or 2, or -o (--open), -i (--in-progress) or -c (--closed)");
-			System.out.println("    rm <-a | --all | index | indexBegin indexEnd>    remove index-task or all or all of the tasks between indexBegin and indexEnd, inclusive");
-			System.out.println("    save [-o <file.csv> | --output <file.csv>]       save tasks into a csv file");
-			System.out.println("    exit [-o <file.csv> | --output <file.csv>]       alias for `quit` command");
-			System.out.println("    quit [-o <file.csv> | --output <file.csv>]       quit Simker and, optinally, saves the tasks in a csv file ");
-			System.out.println("    clear                                            clear screen");
-			System.out.println("    ls                                               list tasks");
-			System.out.println("    reset                                            alias for `rm --all` and `rm -a`");
-			System.out.println("    help                                             show this message");
+			System.out.println("    add <name> [description]                       add a new task.");
+			System.out.println("    mark <index> <status>                          mark the index-task with the given status, which is given by 0, 1 or 2, or -o (--open),");
+			System.out.println("                                                   -i (--in-progress) or -c (--closed), respectively.");
+			System.out.println("    rm <-a | --all | index [index]>                remove index-task or all or all of the tasks in a range.");
+			System.out.println("    save [-o <file.csv> | --output <file.csv>]     save tasks into a csv file.");
+			System.out.println("    exit [-o <file.csv> | --output <file.csv>]     alias for `quit` command.");
+			System.out.println("    quit [-o <file.csv> | --output <file.csv>]     quit Simker and, optinally, saves the tasks in a csv file.");
+			System.out.println("         [-s | --save]");
+			System.out.println("    clear                                          clear screen.");
+			System.out.println("    ls                                             list tasks.");
+			System.out.println("    reset                                          alias for `rm --all` and `rm -a`.");
+			System.out.println("    help                                           show this message.");
 			break;
 		}
 
@@ -378,7 +380,9 @@ public class Simker {
 				System.out.println("**empty**");
 			} else {
 				for (int i = 0; i < this.tasks.size(); ++i) {
-					System.out.println(i + ". " + this.tasks.get(i));
+					System.out.printf("%d. %s%n",
+									  i,
+									  this.tasks.get(i));
 				}
 			}
 			break;
@@ -403,7 +407,7 @@ public class Simker {
 		case 2: {
 			Token arg = args.get(1);
 			if (arg.type() != TokenType.COMMAND) {
-				System.out.printf("%d: ERROR: expected COMMAND but got '%s'%n",
+				System.out.printf("%d: ERROR: expected COMMAND but got `%s`%n",
 								  arg.index(),
 								  arg.type());
 				break;
@@ -411,11 +415,20 @@ public class Simker {
 
 			if (arg.value().equals("-o") || 
 				arg.value().equals("--output")) {
-				System.out.printf("%d: ERROR: missing file for '%s'%n",
+				System.out.printf("%d: ERROR: missing file for `%s`%n",
 								  arg.index(),
 								  arg.value());
+			} else if (arg.value().equals("-s") ||
+					   arg.value().equals("--save")) {
+				if (saveTasks("tasks.csv")) { 
+					System.out.printf("Saving tasks...%n");
+					System.out.println("Goodbye!");
+					returnStatus = 0;
+				} else {
+					System.out.printf("ERROR: could not save tasks%n");
+				}
 			} else {
-				System.out.printf("%d: ERROR: unknow subcommand '%s'%n",
+				System.out.printf("%d: ERROR: unknow subcommand `%s`%n",
 								  arg.index(),
 								  arg.value());
 			}
@@ -425,14 +438,14 @@ public class Simker {
 		case 3: {
 			Token subcommand = args.get(1);
 			if (subcommand.type() != TokenType.COMMAND) {
-				System.out.printf("%d: ERROR: expected COMMAND but got '%s'%n",
+				System.out.printf("%d: ERROR: expected COMMAND but got `%s`%n",
 								  subcommand.index(),
 								  subcommand.type());
 				break;
 			}
 			if (!(subcommand.value().equals("-o") || 
 				subcommand.value().equals("--output"))) {
-				System.out.printf("%d: ERROR: unknow subcommand '%s'%n",
+				System.out.printf("%d: ERROR: unknow subcommand `%s`%n",
 								  subcommand.index(),
 								  subcommand.value());
 				break;
@@ -440,13 +453,13 @@ public class Simker {
 
 			Token file = args.get(2);	
 			if (file.type() != TokenType.STRING) {
-				System.out.printf("%d: ERROR: expected STRING but got '%s'%n",
+				System.out.printf("%d: ERROR: expected STRING but got `%s`%n",
 								  file.index(),
 								  file.type());
 				break;
 			}
 			if (!file.value().endsWith(".csv")) {
-				System.out.printf("%d: ERROR: expected a csv file but got '%s'%n",
+				System.out.printf("%d: ERROR: expected a csv file but got `%s`%n",
 								  file.index(),
 								  file.value());
 				break;
@@ -459,7 +472,7 @@ public class Simker {
 				System.out.println("Goodbye!");
 				returnStatus = 0;
 			} else {
-				System.out.printf("ERROR: could not write into the file: '%s'%n",
+				System.out.printf("ERROR: could not write into the file: `%s`%n",
 								   filePath);
 			}
 			break;
