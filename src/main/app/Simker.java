@@ -193,9 +193,8 @@ public class Simker {
 	public void loadTasks(ArrayList<Token> args) {
 		switch (args.size()) {
 		case 1: {
-			System.out.printf("%d: ERROR: missing file path for '%s' command%n",
-							  args.get(0).index(),
-						      args.get(0).value());
+			loadTasks("tasks.csv");
+			System.out.println("Loading tasks...");
 			break;
 		}
 
@@ -244,9 +243,10 @@ public class Simker {
 			System.out.println("                                                   -i (--in-progress) or -c (--closed), respectively.");
 			System.out.println("    rm <-a | --all | index [index]>                remove index-task or all or all of the tasks in a range.");
 			System.out.println("    save [-o <file.csv> | --output <file.csv>]     save tasks into a csv file.");
-			System.out.println("    exit [-o <file.csv> | --output <file.csv>]     alias for `quit` command.");
-			System.out.println("    quit [-o <file.csv> | --output <file.csv>]     quit Simker and, optinally, saves the tasks in a csv file.");
-			System.out.println("         [-s | --save]");
+			System.out.println("    quit [-o <file.csv> | --output <file.csv> |    quit Simker and, optinally, saves the tasks in a csv file.");
+			System.out.println("          -s | --save]                             Note that `quit -s` is a alias for `save` and then `quit`.");
+			System.out.println("    load [file.csv]                                load tasks from file. If no file path is provided, load from `tasks.csv`.");
+			System.out.println("    exit                                           alias for `quit` command.");
 			System.out.println("    clear                                          clear screen.");
 			System.out.println("    ls                                             list tasks.");
 			System.out.println("    reset                                          alias for `rm --all` and `rm -a`.");
