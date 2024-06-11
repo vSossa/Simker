@@ -28,7 +28,7 @@ public class Simker {
 		try { 
 			lines = Files.readAllLines(Paths.get(tasksFilePath));
 		} catch (IOException e) {
-			System.out.printf("ERROR: could not read tasks from '%s'%n",
+			System.out.printf("ERROR: could not read tasks from `%s`%n",
 							  tasksFilePath);
 			System.exit(1);
 		} 
@@ -167,7 +167,7 @@ public class Simker {
 			System.out.printf("%d: ERROR: unknow command: %s%n", 
 							  op.index(),
 							  op.value());
-			System.out.println("TIP: type 'help' for help");
+			System.out.println("TIP: type `help` for help");
 		}
 		}	
 
@@ -183,7 +183,7 @@ public class Simker {
 		}
 
 		default: {
-			System.out.printf("%d: ERROR: too many arguments for '%s'%n",
+			System.out.printf("%d: ERROR: too many arguments for `%s`%n",
 							  args.get(0).index(),
 							  args.get(0).value());
 		}
@@ -201,13 +201,13 @@ public class Simker {
 		case 2: {
 		    Token filePath = args.get(1);
 			if (filePath.type() != TokenType.STRING) {
-				System.out.printf("%d: ERROR: expected STRING but got '%s'%n",
+				System.out.printf("%d: ERROR: expected STRING but got `%s`%n",
 								  filePath.index(),
 								  filePath.value());
 				break;
 			}
 			if (!filePath.value().endsWith(".csv")) {
-				System.out.printf("%d: ERROR: expected a csv file: '%s'%n",
+				System.out.printf("%d: ERROR: expected a csv file: `%s`%n",
 								  filePath.index(),
 								  filePath.value());
 				break;
@@ -219,7 +219,7 @@ public class Simker {
 		}
 
 		default: {
-			System.out.printf("ERROR: too many arguments for '%s'%n",
+			System.out.printf("ERROR: too many arguments for `%s`%n",
 							  args.get(0).value());
 		}
 		}
@@ -229,7 +229,7 @@ public class Simker {
 		if (args == null || args.size() == 1) {
 			System.out.printf("\033[H\033[J");
 		} else {
-			System.out.printf("ERROR: too many arguments for '%s'%n",
+			System.out.printf("ERROR: too many arguments for `%s`%n",
 							  args.get(0).value());
 		}
 	}
@@ -244,7 +244,7 @@ public class Simker {
 			System.out.println("    rm <-a | --all | index [index]>                remove index-task or all or all of the tasks in a range.");
 			System.out.println("    save [-o <file.csv> | --output <file.csv>]     save tasks into a csv file.");
 			System.out.println("    quit [-o <file.csv> | --output <file.csv> |    quit Simker and, optinally, saves the tasks in a csv file.");
-			System.out.println("          -s | --save]                             Note that `quit -s` is a alias for `save` and then `quit`.");
+			System.out.println("          -s | --save]                             Note that `quit -s` and `quit --save` are aliases for `save` and then `quit`.");
 			System.out.println("    load [file.csv]                                load tasks from file. If no file path is provided, load from `tasks.csv`.");
 			System.out.println("    exit                                           alias for `quit` command.");
 			System.out.println("    clear                                          clear screen.");
@@ -255,7 +255,7 @@ public class Simker {
 		}
 
 		default: {
-			System.out.printf("ERROR: too many arguments for '%s'%n",
+			System.out.printf("ERROR: too many arguments for `%s`%n",
 							  args.get(0).value());
 		}	
 		}
@@ -264,7 +264,7 @@ public class Simker {
 	public void removeTasks(ArrayList<Token> args) {
 		switch (args.size()) {
 		case 1: {
-			System.out.printf("ERROR: not enough arguments for '%s'%n",
+			System.out.printf("ERROR: not enough arguments for `%s`%n",
 							  args.get(0).value());
 			break;
 		}
@@ -281,7 +281,7 @@ public class Simker {
 		}
 
 		default: {
-			System.out.printf("ERROR: too many arguments for '%s'%n",
+			System.out.printf("ERROR: too many arguments for `%s`%n",
 							  args.get(0).value());
 		}
 		}
@@ -290,7 +290,7 @@ public class Simker {
 	public void addTask(ArrayList<Token> args) { 
 		switch (args.size()) {
 		case 1: {
-			System.out.printf("ERROR: not enough arguments for '%s'%n",
+			System.out.printf("ERROR: not enough arguments for `%s`%n",
 							  args.get(0).value());
 			break;
 		}
@@ -298,7 +298,7 @@ public class Simker {
 		case 2: {
 			Token t = args.get(1);
 			if (t.type() != TokenType.STRING) {
-				System.out.printf("%d: ERROR: expected STRING but got: '%s'%n",
+				System.out.printf("%d: ERROR: expected STRING but got: `%s`%n",
 								  t.index(),
 								  t.type());
 				break;
@@ -306,7 +306,7 @@ public class Simker {
 
 			String name = t.value();
 			if (Tokenizer.stripLeft(name, " ", 0) == -1) {
-				System.out.println("ERROR: a task must have at least one character");
+				System.out.println("ERROR: the name of a task must have at least one character");
 				break;
 			}
 
@@ -318,13 +318,13 @@ public class Simker {
 			Token t1 = args.get(1);
 			Token t2 = args.get(2);
 			if (t1.type() != TokenType.STRING ) {
-				System.out.printf("%d: ERROR: expected STRING but got: '%s'%n",
+				System.out.printf("%d: ERROR: expected STRING but got: `%s`%n",
 								  t1.index(),
 								  t1.type());
 				break;
 			} 
 			if (t2.type() != TokenType.STRING) {
-				System.out.printf("%d: ERROR: expected STRING but got: '%s'%n",
+				System.out.printf("%d: ERROR: expected STRING but got: `%s`%n",
 								  t2.index(),
 								  t2.type());
 				break;
@@ -332,7 +332,7 @@ public class Simker {
 
 			String name = t1.value();
 			if (Tokenizer.stripLeft(name, " ", 0) == -1) {
-				System.out.println("ERROR: a task must have at least one character");
+				System.out.println("ERROR: the name of a task must have at least one character");
 				break;
 			}
 
@@ -346,7 +346,7 @@ public class Simker {
 		}
 
 		default: {
-			System.out.printf("ERROR: too many arguments for '%s'%n",
+			System.out.printf("ERROR: too many arguments for `%s`%n",
 							   args.get(0).value());
 		}
 		}
@@ -355,7 +355,7 @@ public class Simker {
 	public void markTask(ArrayList<Token> args) {
 		switch (args.size()) {
 		case 1: case 2: {
-			System.out.printf("ERROR: missing arguments for '%s'%n",
+			System.out.printf("ERROR: missing arguments for `%s`%n",
 							  args.get(0).value());
 			break;
 		}
@@ -367,7 +367,7 @@ public class Simker {
 		}
 
 		default: {
-			System.out.printf("ERROR: too many arguments for '%s'%n",
+			System.out.printf("ERROR: too many arguments for `%s`%n",
 							  args.get(0).value());
 		}
 		}
@@ -389,7 +389,7 @@ public class Simker {
 		}
 		
 		default: {
-			System.out.printf("ERROR: too many arguments for '%s'%n",
+			System.out.printf("ERROR: too many arguments for `%s`%n",
 							  args.get(0).value());
 		}
 		}
@@ -479,7 +479,7 @@ public class Simker {
 		}
 
 		default: {
-			System.out.printf("%d: ERROR: too many arguments for '%s' command%n",
+			System.out.printf("%d: ERROR: too many arguments for `%s` command%n",
 							  args.get(1).index(),
 						      args.get(1).value());
 		}
@@ -538,13 +538,13 @@ public class Simker {
 
 			Token file = args.get(2);	
 			if (file.type() != TokenType.STRING) {
-				System.out.printf("%d: ERROR: expected STRING but got '%s'%n",
+				System.out.printf("%d: ERROR: expected STRING but got `%s`%n",
 								  file.index(),
 								  file.type());
 				break;
 			}
 			if (!file.value().endsWith(".csv")) {
-				System.out.printf("%d: ERROR: expected a csv file but got '%s'%n",
+				System.out.printf("%d: ERROR: expected a csv file but got `%s`%n",
 								  file.index(),
 								  file.value());
 				break;
@@ -554,7 +554,7 @@ public class Simker {
 				System.out.printf("Saving tasks into %s...%n",
 								  file.value());
 			} else {
-				System.out.printf("%d: ERROR: could not write into file: '%s'%n",
+				System.out.printf("%d: ERROR: could not write into file: `%s`%n",
 								   file.index(),
 								   file.value());
 			}
@@ -625,7 +625,7 @@ public class Simker {
 				System.out.printf("Removing all tasks...%n");
 				this.tasks.clear();
 			} else {
-				System.out.printf("%d: ERROR: unknow subcommand: '%s'%n",
+				System.out.printf("%d: ERROR: unknow subcommand: `%s`%n",
 								  arg.index(), 
 								  arg.value());
 			}
@@ -633,7 +633,7 @@ public class Simker {
 		} 
 
 		default: {
-			System.out.printf("%d: ERROR: unknow subcommand: '%s'%n",
+			System.out.printf("%d: ERROR: unknow subcommand: `%s`%n",
 						      arg.index(),
 							  arg.value());
 		}
@@ -698,7 +698,7 @@ public class Simker {
 
 		int i = Integer.parseInt(index.value());
 		if (isOutOfBounds(i)) {
-			System.out.printf("%d: ERROR: '%d' is out of bounds%n",
+			System.out.printf("%d: ERROR: `%d` is out of bounds%n",
 							  index.index(),
 							  i);
 			return ;
@@ -709,7 +709,7 @@ public class Simker {
 			int statusValue = Integer.parseInt(status.value());
 			Status s = statusValueToStatus(statusValue);
 			if (s == null) {
-				System.out.printf("%d: ERROR: invalid status code: '%s'%n",
+				System.out.printf("%d: ERROR: invalid status code: `%s`%n",
 								  status.index(),
 								  statusValue);
 			} else {
@@ -724,7 +724,7 @@ public class Simker {
 			String statusString = status.value();
 			Status s = statusStringToStatus(statusString);
 			if (s == null) {
-				System.out.printf("%d: ERROR: invalid subcommand: '%s'%n",
+				System.out.printf("%d: ERROR: invalid subcommand: `%s`%n",
 								  status.index(),
 								  statusString);
 			} else {
