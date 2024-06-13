@@ -241,7 +241,9 @@ public class Simker {
 			System.out.println("    add <name> [description]                       add a new task.");
 			System.out.println("    mark <index> <status>                          mark the index-task with the given status, which is given by 0, 1 or 2, or -o (--open),");
 			System.out.println("                                                   -i (--in-progress) or -c (--closed), respectively.");
-			System.out.println("    rm <-a | --all | index [index]>                remove index-task or all or all of the tasks in a range.");
+			System.out.println("    rm <-a | --all | index ... |                   remove index-task or all or all of the tasks in a range.");
+			System.out.println("       --range <indexBegin> <indexEnd | ..>>       If, as the last argument of the `--range` subcommand, you pass `..`, then all of the tasks"); 
+			System.out.println("                                                   between the beginning and the end are going to be removed.");
 			System.out.println("    save [-o <file.csv> | --output <file.csv>]     save tasks into a csv file.");
 			System.out.println("    quit [-o <file.csv> | --output <file.csv> |    quit Simker and, optinally, saves the tasks in a csv file.");
 			System.out.println("          -s | --save]                             Note that `quit -s` and `quit --save` are aliases for `save` and then `quit`.");
@@ -262,29 +264,43 @@ public class Simker {
 	}
 
 	public void removeTasks(ArrayList<Token> args) {
-		switch (args.size()) {
-		case 1: {
+		final int len = args.size();
+		if (len == 1) {
 			System.out.printf("ERROR: not enough arguments for `%s`%n",
 							  args.get(0).value());
-			break;
-		}
+		} else if (args.get(1).value().equals("--range")) {
+			if (len < 4) { 
+				System.out.println("ERROR: not enough arguments for subcommand: `--range`");
+				return ;
+			} 
+			if (len > 4) { 
+				System.out.println("ERROR: too many arguments for subcommand: `--range`");
+				return ;
+			} 
 
-		case 2: {
-			removeTask(args.get(1));
-			break;
-		}
+			removeTaskRange(args.get(2),
+							args.get(3));
+		} else {
+			ArrayList<Task> toRemove = new ArrayList<>();
+			for (int i = 1; i < len; ++i) {
+				if (args.get(i).type() != TokenType.INT) {
+					System.out.printf("%d: ERROR: not an integer: `%s`%n",
+									   i,
+									   args.get(i).value());
+					return ;
+				} 
 
-		case 3: {
-			removeTaskRange(args.get(1),
-							args.get(2));
-			break;
-		}
+				int index = Integer.parseInt(args.get(i).value());
+				if (isOutOfBounds(index)) {
+					System.out.printf("%d: ERROR: out of bounds: `%d`%n",
+									   i, index);
+					return ;
+				} 
+				toRemove.add(this.tasks.get(index));
+			}	
 
-		default: {
-			System.out.printf("ERROR: too many arguments for `%s`%n",
-							  args.get(0).value());
-		}
-		}
+			this.tasks.removeAll(toRemove);
+		} 
 	}
 
 	public void addTask(ArrayList<Token> args) { 
@@ -602,54 +618,16 @@ public class Simker {
 		}
 	}
 
-	private void removeTask(Token arg) {
-		switch (arg.type()) {
-		case INT: {
-			int index = Integer.parseInt(arg.value());
-			if (isOutOfBounds(index)) {
-				System.out.printf("%d: ERROR: %d is out of bounds%n",
-								  arg.index(),
-								  index);
-				break;
-			}
-
-			System.out.printf("Removing %d-task...%n",
-							  index);
-			this.tasks.remove(index);
-			break;
-		}
-
-		case COMMAND: {
-			if (arg.value().equals("--all") ||
-				arg.value().equals("-a")) {
-				System.out.printf("Removing all tasks...%n");
-				this.tasks.clear();
-			} else {
-				System.out.printf("%d: ERROR: unknow subcommand: `%s`%n",
-								  arg.index(), 
-								  arg.value());
-			}
-			break;
-		} 
-
-		default: {
-			System.out.printf("%d: ERROR: unknow subcommand: `%s`%n",
-						      arg.index(),
-							  arg.value());
-		}
-		}
-	} 
-
 	private void removeTaskRange(Token indexStart, Token indexEnd) {
 		if (indexStart.type() != TokenType.INT) {
-			System.out.printf("%d: ERROR: expected INT but got: %s%n", 
+			System.out.printf("%d: ERROR: expected INT but got: `%s`%n", 
 							  indexStart.index(),
 							  indexStart.value()); 
 			return ;
 		}	
 
-		if (indexEnd.type() != TokenType.INT) {
-			System.out.printf("%d: ERROR: expected INT but got: %s%n", 
+		if (indexEnd.type() == TokenType.STRING) {
+			System.out.printf("%d: ERROR: expected INT or COMMAND, but got: `%s`%n", 
 							  indexEnd.index(),
 							  indexEnd.value()); 
 			return ;
@@ -664,27 +642,43 @@ public class Simker {
 			return ;
 		}
 
-		j = Integer.parseInt(indexEnd.value());
-		if (isOutOfBounds(j)) {
-			System.out.printf("%d: ERROR: %d is out of bounds%n", 
-							  indexEnd.index(),
-							  j); 
-			return ;
-		}
+		if (indexEnd.type() == TokenType.COMMAND) {
+			if (!indexEnd.value().equals("..")) {
+				System.out.printf("%d: ERROR: unknow subcommand: `%s`%n",
+								   indexEnd.index(),
+								   indexEnd.value());	
+				return ;
+			}
 
-		if (j < i) {
-			System.out.printf("ERROR: invalid range: %d < %d%n", 
-							  j, i);
-			return ;
-		}	
+			System.out.printf("Removing tasks between %d and the end...%n",
+							  i);
+			int start = i;
+			while (i <= this.tasks.size()) {
+				this.tasks.remove(start);
+				++i;	
+			}
+		} else {
+			j = Integer.parseInt(indexEnd.value());
+			if (isOutOfBounds(j)) {
+				System.out.printf("%d: ERROR: %d is out of bounds%n", 
+								  indexEnd.index(),
+								  j); 
+				return ;
+			}
 
-		System.out.printf("Removing all tasks between %d and %d%n",
-						  i, j);
+			if (j < i) {
+				System.out.printf("ERROR: invalid range: %d < %d%n", 
+								  j, i);
+				return ;
+			}	
 
-		int start = i;
-		while (i <= j) {
-			this.tasks.remove(start);
-			++i;	
+			System.out.printf("Removing all tasks between %d and %d%n",
+							  i, j);
+			int start = i;
+			while (i <= j) {
+				this.tasks.remove(start);
+				++i;	
+			}
 		}
 	}
 
