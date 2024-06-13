@@ -377,8 +377,60 @@ public class Simker {
 		}
 
 		case 3: {
-			markTask(args.get(1), 
-					 args.get(2));
+			Token index = args.get(1);
+			Token status = args.get(2);
+			if (index.type() != TokenType.INT) {
+				System.out.printf("%d: ERROR: expected INT but got: %s%n",
+								  index.index(),
+								  index.type());
+				return ;
+			} 
+
+			int i = Integer.parseInt(index.value());
+			if (isOutOfBounds(i)) {
+				System.out.printf("%d: ERROR: `%d` is out of bounds%n",
+								  index.index(),
+								  i);
+				return ;
+			} 	
+
+			switch (status.type()) {
+			case INT: {
+				int statusValue = Integer.parseInt(status.value());
+				Status s = statusValueToStatus(statusValue);
+				if (s == null) {
+					System.out.printf("%d: ERROR: invalid status code: `%s`%n",
+									  status.index(),
+									  statusValue);
+				} else {
+					Task t = this.tasks.get(i);
+					t.setStatus(s);	
+					this.tasks.set(i, t);
+				}
+				break;
+			}
+
+			case COMMAND: {
+				String statusString = status.value();
+				Status s = statusStringToStatus(statusString);
+				if (s == null) {
+					System.out.printf("%d: ERROR: invalid subcommand: `%s`%n",
+									  status.index(),
+									  statusString);
+				} else {
+					Task t = this.tasks.get(i);
+					t.setStatus(s);	
+					this.tasks.set(i, t);
+				}
+				break;
+			}
+
+			default: {
+				System.out.printf("%d: ERROR: expected COMMAND or INT: %s%n",
+								  status.index(),
+								  status.type());
+			}
+			}
 			break;
 		}
 
@@ -679,61 +731,6 @@ public class Simker {
 				this.tasks.remove(start);
 				++i;	
 			}
-		}
-	}
-
-	private void markTask(Token index, Token status) {
-		if (index.type() != TokenType.INT) {
-			System.out.printf("%d: ERROR: expected INT but got: %s%n",
-							  index.index(),
-							  index.type());
-			return ;
-		} 
-
-		int i = Integer.parseInt(index.value());
-		if (isOutOfBounds(i)) {
-			System.out.printf("%d: ERROR: `%d` is out of bounds%n",
-							  index.index(),
-							  i);
-			return ;
-		} 	
-
-		switch (status.type()) {
-		case INT: {
-			int statusValue = Integer.parseInt(status.value());
-			Status s = statusValueToStatus(statusValue);
-			if (s == null) {
-				System.out.printf("%d: ERROR: invalid status code: `%s`%n",
-								  status.index(),
-								  statusValue);
-			} else {
-				Task t = this.tasks.get(i);
-				t.setStatus(s);	
-				this.tasks.set(i, t);
-			}
-			break;
-		}
-
-		case COMMAND: {
-			String statusString = status.value();
-			Status s = statusStringToStatus(statusString);
-			if (s == null) {
-				System.out.printf("%d: ERROR: invalid subcommand: `%s`%n",
-								  status.index(),
-								  statusString);
-			} else {
-				Task t = this.tasks.get(i);
-				t.setStatus(s);	
-				this.tasks.set(i, t);
-			}
-			break;
-		}
-
-		default: {
-			System.out.printf("%d: ERROR: expected COMMAND or INT: %s%n",
-							  status.index(),
-							  status.type());
-		}
 		}
 	}
 
