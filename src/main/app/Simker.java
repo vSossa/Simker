@@ -123,6 +123,11 @@ public class Simker {
 			break;
 		}
 
+		case "progress": {
+			progressTask(tokens);
+			break;
+		}
+
 		case "clear": {
 			clear(tokens);
 			break;
@@ -158,6 +163,11 @@ public class Simker {
 			break;
 		}
 
+		case "select": {
+			selectTasksAndDoCommand(tokens);
+			break;
+		}
+
 		case "reset": {
 			resetTasks(tokens);
 			break;
@@ -172,6 +182,50 @@ public class Simker {
 		}	
 
 		return returnStatus;
+	}
+
+	public void progressTask(ArrayList<Token> args) {
+		switch (args.size()) {
+		case 1: {
+			System.out.printf("ERROR: missing task index%n");
+			break;
+		}
+
+		case 2: {
+			Token indexToken = args.get(1);
+			if (indexToken.type() != TokenType.INT) {
+				System.out.printf("%d: ERROR: expected an index: `%s`%n",
+								  indexToken.index(),
+								  indexToken.value());
+				break;
+			}				
+
+			int index = Integer.parseInt(indexToken.value());
+			if (isOutOfBounds(index)) {
+				System.out.printf("%d: ERROR: out of bounds: `%d`%n",
+								  indexToken.index(),
+								  index);
+			} else {
+				Task t = this.tasks.get(index);
+				Status s = t.status();
+				
+				if (s == Status.OPEN) {
+					t.setStatus(Status.IN_PROGRESS);	
+					this.tasks.set(index, t);
+				} else if (s == Status.IN_PROGRESS) {
+					t.setStatus(Status.CLOSED);	
+					this.tasks.set(index, t);
+				} else {
+					this.tasks.remove(t);
+				}
+			}
+			break;
+		} 
+
+		default: {
+			System.out.printf("ERROR: too many arguments%n");
+		}
+		}
 	}
 
 	public void resetTasks(ArrayList<Token> args) {
@@ -225,6 +279,10 @@ public class Simker {
 		}
 	}
 
+	public void selectTasksAndDoCommand(ArrayList<Token> args) {
+		todo("select <index ...> <command>");
+	}
+
 	public void clear(ArrayList<Token> args) {
 		if (args == null || args.size() == 1) {
 			System.out.printf("\033[H\033[J");
@@ -239,14 +297,18 @@ public class Simker {
 		case 1: {
 			System.out.println("COMMANDS:");
 			System.out.println("    add <name> [description]                       add a new task.");
+
 			System.out.println("    mark <index> <status>                          mark the index-task with the given status, which is given by 0, 1 or 2, or -o (--open),");
 			System.out.println("                                                   -i (--in-progress) or -c (--closed), respectively.");
+
 			System.out.println("    rm <-a | --all | index ... |                   remove index-task or all or all of the tasks in a range.");
 			System.out.println("       --range <indexBegin> <indexEnd | ..>>       If, as the last argument of the `--range` subcommand, you pass `..`, then all of the tasks"); 
 			System.out.println("                                                   between the beginning and the end are going to be removed.");
+
 			System.out.println("    save [-o <file.csv> | --output <file.csv>]     save tasks into a csv file.");
 			System.out.println("    quit [-o <file.csv> | --output <file.csv> |    quit Simker and, optinally, saves the tasks in a csv file.");
 			System.out.println("          -s | --save]                             Note that `quit -s` and `quit --save` are aliases for `save` and then `quit`.");
+
 			System.out.println("    load [file.csv]                                load tasks from file. If no file path is provided, load from `tasks.csv`.");
 			System.out.println("    exit                                           alias for `quit` command.");
 			System.out.println("    clear                                          clear screen.");

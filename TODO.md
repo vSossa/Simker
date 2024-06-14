@@ -2,6 +2,10 @@
 
 [x] allow the user to save the tasks
 
-[ ] allow the user to save the tasks from inside Simker at any time
+[x] allow the user to save the tasks from inside Simker at any time
 
-[ ] allow users to remove more than one tasks, not necessarily in a range
+[x] allow users to remove more than one tasks, not necessarily in a range
+
+[ ] allow the user to `up` a task with a command. When it's `closed`, the next step it's to delete that task.
+
+[ ] allow the user to `select` tasks and do a command on those tasks. `select <index ...> <command>`
