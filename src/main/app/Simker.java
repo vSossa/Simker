@@ -64,19 +64,19 @@ public class Simker {
 			if (j == 1) ++j;	
 
 			description = taskComponents.get(j);
-			while (Tokenizer.count(name, "\"", 0) < 2) { 
+			while (Tokenizer.count(description, "\"", 0) < 2) { 
 				// string
-				if (Tokenizer.count(name, "\"", 0) > 1) {
+				if (Tokenizer.count(description, "\"", 0) > 1) {
 					j++;	
 				// ...string...
 				} else {
 					do {
 						++j;
-						name = (j == len) ?
-								name :
-								name.concat(" ").concat(taskComponents.get(j));
+						description = (j == len) ?
+								description :
+								description.concat(" ").concat(taskComponents.get(j));
 					} while (j < len && 
-							 Tokenizer.count(name, "\"", 0) != 2);
+							 Tokenizer.count(description, "\"", 0) != 2);
 				}
 			}
 
@@ -280,7 +280,132 @@ public class Simker {
 	}
 
 	public void selectTasksAndDoCommand(ArrayList<Token> args) {
-		todo("select <index ...> <command>");
+		ArrayList<Token> tokensToCommand = new ArrayList<>();
+
+		int len = args.size();
+		if (len == 1) { 
+			System.out.printf("ERROR: not enough arguments%n");
+			return ;
+		} 
+		if (len == 2) {
+			System.out.printf("ERROR: not enough arguments%n");
+			return ;
+		}
+	
+		int i = 1;
+		while (i < len && args.get(i).type() != TokenType.COMMAND) {
+			Token arg = args.get(i);
+			if (arg.type() != TokenType.INT) {
+				System.out.printf("%d: ERROR: not an integer: `%s`%n",
+                                  i, arg.value());
+				return ;
+			}
+
+			if (isOutOfBounds(Integer.parseInt(arg.value()))) { 
+				System.out.printf("%d: ERROR: out of bounds: `%s`%n",
+                                  i, arg.value());
+				return ;
+			}
+			tokensToCommand.add(arg);
+			++i;
+		}
+
+		if (i == len) {
+			System.out.printf("%d: ERROR: missing command%n",
+                              i);
+			return ;
+		} 
+
+		tokensToCommand = sortTokenIndexes(tokensToCommand);	
+
+		Token command = args.get(i);
+		switch (command.value()) {
+		case "progress": {
+			if (i != len - 1) {
+				System.out.printf("%d: ERROR: too many arguments for `%s`%n",
+                                  i, 
+                                  command.value());
+				break;
+			}
+
+			ArrayList<Token> progressAndIndexed = new ArrayList<>();
+				progressAndIndexed.add(command);
+				progressAndIndexed.add(null);
+			for (int j = 0; j < tokensToCommand.size(); ++j) {
+				progressAndIndexed.set(1, tokensToCommand.get(j));
+				progressTask(progressAndIndexed);	
+			}
+			break;
+		}
+        
+		case "rm": {
+			if (i != len - 1) {
+				System.out.printf("%d: ERROR: too many arguments for `%s`%n",
+                                  i, 
+                                  command.value());
+				break;
+			}
+
+			tokensToCommand.add(0, command);
+			removeTasks(tokensToCommand);
+			break;
+		}
+
+		case "mark": {
+			if (i == len - 1) { 
+				System.out.printf("%d: ERROR: not enough arguments for `%s`%n",
+                                  i, 
+                                  command.value());	
+				break;
+			} 
+			if (i > len - 2) {
+				System.out.printf("%d: ERROR: too many arguments for `%s`%n",
+                                  i, 
+                                  command.value());
+				break;
+			}
+			
+			ArrayList<Token> markAndIndexes = new ArrayList<>();
+				markAndIndexes.add(command);
+				markAndIndexes.add(null);
+				markAndIndexes.add(null);
+				markAndIndexes.set(2, args.get(++i));
+			for (int j = 0; j < tokensToCommand.size(); ++j) {
+				markAndIndexes.set(1, tokensToCommand.get(j));
+				markTask(markAndIndexes);
+			}
+			break;	
+		}
+	
+		default: {
+			System.out.printf("ERROR: missing command for the selected tasks%n");
+		}
+		}
+	}
+
+	private ArrayList<Token> sortTokenIndexes(ArrayList<Token> indexed) {
+		ArrayList<Token> sortIndexes = new ArrayList<>();
+			sortIndexes.addAll(indexed);
+		int len = indexed.size();
+		
+		for (int i = 0; i < len - 1; ++i) {
+			boolean swap = false; 
+			for (int j = 0; j < len - i - 1; ++j) {
+				if (Integer.parseInt(indexed.get(j).value()) < 
+                    Integer.parseInt(indexed.get(j + 1).value())) {
+					swap = true;
+					Token aux = indexed.get(j + 1);
+					sortIndexes.set(j + 1, indexed.get(j));
+					sortIndexes.set(j, aux);
+				}
+			}
+
+			if (!swap) { 
+				break;
+			}
+		}
+
+		return sortIndexes;
 	}
 
 	public void clear(ArrayList<Token> args) {
@@ -527,9 +652,10 @@ public class Simker {
 
 	public int quit(ArrayList<Token> args) {
 		int returnStatus = 1;
+		String bye = "Bye!";
 		switch (args.size()) {
 		case 1: {
-			System.out.println("Goodbye!");
+			System.out.println(bye);
 			returnStatus = 0;
 			break;
 		}
@@ -552,7 +678,7 @@ public class Simker {
 					   arg.value().equals("--save")) {
 				if (saveTasks("tasks.csv")) { 
 					System.out.printf("Saving tasks...%n");
-					System.out.println("Goodbye!");
+					System.out.println(bye);
 					returnStatus = 0;
 				} else {
 					System.out.printf("ERROR: could not save tasks%n");
@@ -599,7 +725,7 @@ public class Simker {
 			if (saveTasks(filePath)) { 
 				System.out.printf("Saving tasks into %s...%n",
 								  filePath);
-				System.out.println("Goodbye!");
+				System.out.println(bye);
 				returnStatus = 0;
 			} else {
 				System.out.printf("ERROR: could not write into the file: `%s`%n",
