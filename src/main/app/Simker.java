@@ -252,34 +252,64 @@ public class Simker {
 	}
 
 	public void selectTasksAndDoCommand(ArrayList<Token> args) {
-		// TODO: allow the user to select all of the tasks
-	    // with `select --all <command>`
 		ArrayList<Token> tokensToCommand = new ArrayList<>();
 
 		int len = args.size();
-		if (len <= 2) { 
-			System.out.printf("ERROR: not enough arguments%n");
+		if (len == 1) {
+			System.out.println("ERROR: not enough arguments");
 			return ;
-		} 
-	
+		}
+
 		int i = 1;
-		while (i < len && 
-               args.get(i).type() != TokenType.COMMAND) {
-			Token arg = args.get(i);
-			if (arg.type() != TokenType.INT) {
-				System.out.printf("%d: ERROR: not an integer%n",
-                                  i);
-				return ;
-			}
-			if (isOutOfBounds(Integer.parseInt(arg.value()))) { 
-				System.out.printf("%d: ERROR: out of bounds%n",
-                                  i);
-				return ;
+		switch (args.get(i).type()) {
+		case COMMAND: {
+			if (!(args.get(i).value().equals("-a") ||
+                args.get(i).value().equals("--all"))) {
+				System.out.printf("%d: ERROR: invalid subcommand: `%s`%n",
+                                   i,
+                                   args.get(i).value());
+				return ;	
 			}
 
-			tokensToCommand.add(arg);
+			// add the indexes in reverse order
+			int taskSize = this.tasks.size();
+			Integer j = taskSize - 1;
+			while (j >= 0) {
+				tokensToCommand.add( new Token(j - taskSize + 1, TokenType.INT, j.toString()) );	
+				--j;
+			}
 			++i;
+			break;
+		} 
+
+		case INT: {
+			while (i < len && 
+				   args.get(i).type() != TokenType.COMMAND) {
+				Token arg = args.get(i);
+				if (arg.type() != TokenType.INT) {
+					System.out.printf("%d: ERROR: not an integer%n",
+									  i);
+					return ;
+				}
+				if (isOutOfBounds(Integer.parseInt(arg.value()))) { 
+					System.out.printf("%d: ERROR: out of bounds%n",
+									  i);
+					return ;
+				}
+
+				tokensToCommand.add(arg);
+				++i;
+			}
+			break;
+		} 
+
+		default: {
+			System.out.printf("%d: ERROR: invalid argument: `%s`%n",
+                              i,
+                              args.get(i).value());
+			return ;
 		}
+		} 
 
 		if (i == len) {
 			System.out.printf("ERROR: missing command%n");
@@ -381,8 +411,8 @@ public class Simker {
 
 			System.out.println("    load [file.csv]                                load tasks from file. If no file path is provided, load from `tasks.csv`.");
 
-			System.out.println("    select <index ...> <rm | progress |            apply command to the select tasks");
-            System.out.println("                        mark <status>>"); 
+			System.out.println("    select <-a | --all | index ...>                apply command to the select tasks.");
+            System.out.println("           <rm | progress | mark <status>>"); 
 			
 			System.out.println("    progress <index>                               up the status. If the status is CLOSED, delete it");
 	
@@ -813,6 +843,7 @@ public class Simker {
 
 	/*
 	 *	Testing if the string has at least one character that is not a space
+     *  if not, then it's empty
 	 */
 	private boolean stringIsEmpty(String name) {
 		return Tokenizer.stripLeft(name, " ", 0) == -1;
