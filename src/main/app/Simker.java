@@ -290,19 +290,20 @@ public class Simker {
 		} 
 	
 		int i = 1;
-		while (i < len && args.get(i).type() != TokenType.COMMAND) {
+		while (i < len && 
+               args.get(i).type() != TokenType.COMMAND) {
 			Token arg = args.get(i);
 			if (arg.type() != TokenType.INT) {
 				System.out.printf("%d: ERROR: not an integer: `%s`%n",
                                   i, arg.value());
 				return ;
 			}
-
 			if (isOutOfBounds(Integer.parseInt(arg.value()))) { 
 				System.out.printf("%d: ERROR: out of bounds: `%s`%n",
                                   i, arg.value());
 				return ;
 			}
+
 			tokensToCommand.add(arg);
 			++i;
 		}
@@ -312,7 +313,7 @@ public class Simker {
 			return ;
 		} 
 
-		tokensToCommand = sortTokenIndexes(tokensToCommand);	
+		sortTokenIndexes(tokensToCommand);	
 
 		Token command = args.get(i);
 		switch (command.value()) {
@@ -369,8 +370,7 @@ public class Simker {
 			ArrayList<Token> markAndIndex = new ArrayList<>();
 				markAndIndex.add(command);
 				markAndIndex.add(null);
-				markAndIndex.add(null);
-				markAndIndex.set(2, args.get(++i));
+				markAndIndex.add(args.get(++i)); // the status
 			for (int j = 0; j < tokensToCommand.size(); ++j) {
 				markAndIndex.set(1, tokensToCommand.get(j));
 				markTask(markAndIndex);
@@ -854,20 +854,20 @@ public class Simker {
 		}
 	}
 
-	private ArrayList<Token> sortTokenIndexes(ArrayList<Token> indexes) {
-		ArrayList<Token> sortIndexes = new ArrayList<>();
-			sortIndexes.addAll(indexes);
+	private void sortTokenIndexes(ArrayList<Token> indexes) {
 		int len = indexes.size();
-		
+
+		// bubble sort
 		for (int i = 0; i < len - 1; ++i) {
 			boolean swap = false; 
 			for (int j = 0; j < len - i - 1; ++j) {
+				// decreasing order
 				if (Integer.parseInt(indexes.get(j).value()) < 
                     Integer.parseInt(indexes.get(j + 1).value())) {
 					swap = true;
-					Token aux = sortIndexes.get(j);
-					sortIndexes.set(j, sortIndexes.get(j+1));
-					sortIndexes.set(j+1, aux);
+					Token aux = indexes.get(j);
+					indexes.set(j, indexes.get(j+1));
+					indexes.set(j+1, aux);
 				}
 			}
 
@@ -875,8 +875,6 @@ public class Simker {
 				break;
 			}
 		}
-
-		return sortIndexes;
 	}
 
 	private boolean saveTasks(String filePath) {
@@ -903,7 +901,8 @@ public class Simker {
 		return sucess;
  	}
 
-	private void writeTasksIntoFile(Path file) throws IOException {
+	private void writeTasksIntoFile(Path file) 
+	throws IOException {
 		for (Task task : this.tasks) {
 			Files.writeString(file, 
 							  task.toCSVFormat(),
