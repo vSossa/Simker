@@ -154,7 +154,7 @@ public class Simker {
 		}
 
 		case "rm": {
-			removeTasks(tokens);
+			removeTask(tokens);
 			break;
 		}
 
@@ -346,8 +346,13 @@ public class Simker {
 				break;
 			}
 
-			tokensToCommand.add(0, command);
-			removeTasks(tokensToCommand);
+			ArrayList<Token> removeAndIndexed = new ArrayList<>();
+				removeAndIndexed.add(command);
+				removeAndIndexed.add(null);
+			for (int j = 0; j < tokensToCommand.size(); ++j) {
+				removeAndIndexed.set(1, tokensToCommand.get(j));
+				removeTask(removeAndIndexed);	
+			}
 			break;
 		}
 
@@ -394,9 +399,9 @@ public class Simker {
 				if (Integer.parseInt(indexed.get(j).value()) < 
                     Integer.parseInt(indexed.get(j + 1).value())) {
 					swap = true;
-					Token aux = indexed.get(j + 1);
-					sortIndexes.set(j + 1, indexed.get(j));
-					sortIndexes.set(j, aux);
+					Token aux = sortIndexes.get(j);
+					sortIndexes.set(j, sortIndexes.get(j+1));
+					sortIndexes.set(j+1, aux);
 				}
 			}
 
@@ -450,44 +455,90 @@ public class Simker {
 		}
 	}
 
-	public void removeTasks(ArrayList<Token> args) {
-		final int len = args.size();
-		if (len == 1) {
+	public void removeTask(ArrayList<Token> args) {
+		switch (args.size()) { 
+		case 1: {
 			System.out.printf("ERROR: not enough arguments for `%s`%n",
 							  args.get(0).value());
-		} else if (args.get(1).value().equals("--range")) {
-			if (len < 4) { 
-				System.out.println("ERROR: not enough arguments for subcommand: `--range`");
-				return ;
+			break;
+		}
+	
+		case 2: {
+			if (args.get(1).value().equals("--range")) {
+				System.out.printf("%d: ERROR: missing indexes for `range` subcommand%n",
+	                              1);
+				break;
+			}
+
+			if (args.get(1).type() != TokenType.INT) {
+				System.out.printf("%d: ERROR: not an integer: `%s`%n",
+								   1,
+								   args.get(1).value());
+				break;
 			} 
-			if (len > 4) { 
-				System.out.println("ERROR: too many arguments for subcommand: `--range`");
-				return ;
+
+			int index = Integer.parseInt(args.get(1).value());
+			if (isOutOfBounds(index)) {
+				System.out.printf("%d: ERROR: out of bounds: `%d`%n",
+								   1, index);
+				break;
+			} 
+
+			this.tasks.remove(index);
+			break;	
+		}
+
+		case 3: {
+			Token subcommand = args.get(1);
+
+			if (subcommand.type() == TokenType.INT) {
+				System.out.printf("%d: ERROR: too many arguments",
+                                  subcommand.index());
+				break;
+			}
+			if (subcommand.type() != TokenType.COMMAND) {
+				System.out.printf("%d: ERROR: expected COMMAND but got: `%s`%n",
+                                  1, 
+                                  subcommand.value());
+				break;
+			}
+			if (!subcommand.value().equals("--range")) {
+				System.out.printf("%d: ERROR: unknow sucommand: `%s`%n",
+                                  1,
+                                  subcommand.value());
+				break;
+			} 
+
+			System.out.printf("%d: ERROR: missing end index for `range` subcommand%n",
+                              1);
+			break;
+		}
+	
+		case 4: {
+			Token subcommand = args.get(1);
+			if (subcommand.type() != TokenType.COMMAND) {
+				System.out.printf("%d: ERROR: expected COMMAND but got: `%s`%n",
+                                  1, 
+                                  subcommand.value());
+				break;
+			}
+
+			if (!subcommand.value().equals("--range")) {
+				System.out.printf("%d: ERROR: unknow sucommand: `%s`%n",
+                                  1,
+                                  subcommand.value());
+				break;
 			} 
 
 			removeTaskRange(args.get(2),
 							args.get(3));
-		} else {
-			ArrayList<Task> toRemove = new ArrayList<>();
-			for (int i = 1; i < len; ++i) {
-				if (args.get(i).type() != TokenType.INT) {
-					System.out.printf("%d: ERROR: not an integer: `%s`%n",
-									   i,
-									   args.get(i).value());
-					return ;
-				} 
+			break;			
+		}
 
-				int index = Integer.parseInt(args.get(i).value());
-				if (isOutOfBounds(index)) {
-					System.out.printf("%d: ERROR: out of bounds: `%d`%n",
-									   i, index);
-					return ;
-				} 
-				toRemove.add(this.tasks.get(index));
-			}	
-
-			this.tasks.removeAll(toRemove);
-		} 
+		default: {
+			System.out.printf("ERROR: too many arguments%n");
+		}
+		}
 	}
 
 	public void addTask(ArrayList<Token> args) { 
