@@ -40,50 +40,23 @@ public class Simker {
 
 			ArrayList<String> taskComponents = Tokenizer.splitString(line, ',');
 			int len = taskComponents.size();
-			String statusValue = taskComponents.get(0);
+			int j = 0;
+
+			String statusValue = taskComponents.get(j);
 			s = statusValueToStatus(Integer.parseInt(statusValue));
+			++j;
 
-			int j = 1;
-			name = taskComponents.get(j);
-			while (Tokenizer.count(name, "\"", 0) < 2) { 
-				// string
-				if (Tokenizer.count(name, "\"", 0) > 1) {
-					j++;	
-				// ...string...
-				} else {
-					do {
-						++j;
-						name = (j == len) ?
-								name :
-								name.concat(" ").concat(taskComponents.get(j));
-					} while (j < len && 
-							 Tokenizer.count(name, "\"", 0) != 2);
-				}
-			}
-	
-			if (j == 1) ++j;	
+			Token tokenName = Tokenizer.buildStringToken(j, "\"", taskComponents);
+				name = tokenName.prettyValue();
+				j = tokenName.index();
 
-			description = taskComponents.get(j);
-			while (Tokenizer.count(description, "\"", 0) < 2) { 
-				// string
-				if (Tokenizer.count(description, "\"", 0) > 1) {
-					j++;	
-				// ...string...
-				} else {
-					do {
-						++j;
-						description = (j == len) ?
-								description :
-								description.concat(" ").concat(taskComponents.get(j));
-					} while (j < len && 
-							 Tokenizer.count(description, "\"", 0) != 2);
-				}
-			}
+			Token tokenDescription = Tokenizer.buildStringToken(j, "\"", taskComponents);
+				description = tokenDescription.prettyValue();
 
-			if (Tokenizer.stripLeft(description, " ", 0) == -1) {
-				this.tasks.add( new Task(s, name.replace("\"", "")) );
+			if (description.length() == 0) {
+				this.tasks.add( new Task(s, name) );
 			} else {
-				this.tasks.add( new Task(s, name.replace("\"", ""), description.replace("\"", "")) );
+				this.tasks.add( new Task(s, name, description) );
 			}
 		}
 	}
@@ -313,6 +286,7 @@ public class Simker {
 			return ;
 		} 
 
+ 		// avoid messing up the indexes while removing tasks
 		sortTokenIndexes(tokensToCommand);	
 
 		Token command = args.get(i);
@@ -539,7 +513,7 @@ public class Simker {
 				break;
 			} 
 
-			String name = t.value();
+			String name = t.prettyValue();
 			if (Tokenizer.stripLeft(name, " ", 0) == -1) {
 				System.out.println("ERROR: the name of a task must have at least one character");
 				break;
@@ -565,14 +539,14 @@ public class Simker {
 				break;
 			} 
 
-			String name = t1.value();
-			if (Tokenizer.stripLeft(name, " ", 0) == -1) {
+			String name = t1.prettyValue();
+			if (name.length() == 0) {
 				System.out.println("ERROR: the name of a task must have at least one character");
 				break;
 			}
 
-			String description = t2.value();
-			if (Tokenizer.stripLeft(name, " ", 0) == -1) { 
+			String description = t2.prettyValue();
+			if (description.length() == 0) { 
 				this.tasks.add( new Task(name) );	
 			} else {
 				this.tasks.add( new Task(name, description) );	

@@ -18,101 +18,35 @@ public class Tokenizer {
 
 			// "STRING"
 			if (count(rawToken, "\"", 0) >= 1) { 
-				TokenType type = TokenType.STRING;
-				String value = rawToken;	
-				int endIndex;
+				int startIndex = index;	
+				Token stringToken = buildStringToken(index, "\"", rawTokens);
+				index = stringToken.index();
 
-				// string
-				if (count(value, "\"", 0) > 1) {
-					endIndex = index;
-			
-				// ...string...
-				} else {
-					endIndex = index;
-					do {
-						++endIndex;
-						value = (endIndex == LEN_RAW_TOKENS) ?
-								value :
-								value.concat(" ").concat(rawTokens.get(endIndex));
-					} while (endIndex < LEN_RAW_TOKENS && 
-							 count(value, "\"", 0) < 2);
-				}
-
-				// correcting index for error messaging  
-				if (endIndex == LEN_RAW_TOKENS) endIndex--;
-
-				int countStringDelimiter = count(value, "\"", 0);
-				if (!value.endsWith("\"") && countStringDelimiter >= 2) {
-					System.out.printf("%d: ERROR: invalid start of command%n",
-									  index);
+				if (stringToken.value().length() == 1 ||
+  					(!stringToken.value().startsWith("\"") || !stringToken.value().endsWith("\"")) ||
+                    (count(stringToken.value(), "\"", 0) > 2)) {
+					System.out.printf("%d: ERROR: invalid string%n",
+									  startIndex);
 					return null;
 				} 
 
-				if (!value.endsWith("\"") || 
-					(value.endsWith("\"") && value.length() == 1) ||
-					!value.startsWith("\"")) {
-					System.out.printf("%d: ERROR: unclosed string literal%n",
-									  index);
-					return null;
-				} 
-
-				if (value.endsWith("\"") && countStringDelimiter > 2) {
-					System.out.printf("%d: ERROR: invalid string literal%n",
-									  index);
-					return null;
-				}
-
-				tokens.add( new Token(endIndex, type, value.replace("\"", "")) );
-				index = endIndex + 1;	
+				tokens.add(stringToken);
 	
 			// 'STRING'
 			} else if (count(rawToken, "\'", 0) >= 1) {
-				TokenType type = TokenType.STRING;
-				String value = rawToken;	
-				int endIndex;
+				int startIndex = index;	
+				Token stringToken = buildStringToken(index, "\'", rawTokens);
+				index = stringToken.index();
 
-				// string
-				if (count(value, "\'", 0) > 1) {
-					endIndex = index;
-			
-				// ...string...
-				} else {
-					endIndex = index;
-					do {
-						++endIndex;
-						value = (endIndex == LEN_RAW_TOKENS) ?
-								value :
-								value.concat(" ").concat(rawTokens.get(endIndex));
-					} while (endIndex < LEN_RAW_TOKENS && 
-							 count(value, "\'", 0) < 2);
-				}
-
-				// correcting index for error messaging  
-				if (endIndex == LEN_RAW_TOKENS) endIndex--;
-
-				int countStringDelimiter = count(value, "\'", 0);
-				if (!value.endsWith("\'") && countStringDelimiter >= 2) {
-					System.out.printf("%d: ERROR: invalid start of command%n",
-									  index);
+				if (stringToken.value().length() == 1 ||
+  					(!stringToken.value().startsWith("\'") || !stringToken.value().endsWith("\'")) ||
+                    (count(stringToken.value(), "\'", 0) > 2)) {
+					System.out.printf("%d: ERROR: invalid string%n",
+									  startIndex);
 					return null;
 				} 
 
-				if (!value.endsWith("\'") || 
-					(value.endsWith("\'") && value.length() == 1) ||
-					!value.startsWith("\'")) {
-					System.out.printf("%d: ERROR: unclosed string literal%n",
-									  index);
-					return null;
-				} 
-
-				if (value.endsWith("\'") && countStringDelimiter > 2) {
-					System.out.printf("%d: ERROR: invalid string literal%n",
-									  index);
-					return null;
-				}
-
-				tokens.add( new Token(endIndex, type, value.replace("\'", "")) );
-				index = endIndex + 1;	
+				tokens.add(stringToken);
 
 			// WHITESPACE
 			} else if (len == 0) {
@@ -141,6 +75,19 @@ public class Tokenizer {
 		return tokens;
 	}
 
+	public static Token buildStringToken(int indexStart, String delimiter, ArrayList<String> stringParts) {
+		String value = stringParts.get(indexStart);	
+
+		++indexStart;
+		while (indexStart < stringParts.size() &&
+			   count(value, delimiter, 0) < 2) {
+			value = value.concat(" ")
+						 .concat(stringParts.get(indexStart));
+			++indexStart;
+		}
+
+		return new Token(indexStart, TokenType.STRING, value);
+	}
 	/*
 		strips the prefix out of the string from the startIndex.
 		
