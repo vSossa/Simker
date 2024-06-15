@@ -275,7 +275,9 @@ public class Simker {
 			int taskSize = this.tasks.size();
 			Integer j = taskSize - 1;
 			while (j >= 0) {
-				tokensToCommand.add( new Token(j - taskSize + 1, TokenType.INT, j.toString()) );	
+				// even if the index of the token is never used, it's still calculated correctly,
+                // just as it would be if the user selected all of the tasks manually 
+				tokensToCommand.add( new Token(j - taskSize + 2, TokenType.INT, j.toString()) );	
 				--j;
 			}
 			++i;
@@ -379,7 +381,8 @@ public class Simker {
 		}
 	
 		default: {
-			System.out.printf("ERROR: missing command for the selected tasks%n");
+			System.out.printf("%d: ERROR: invalid command for the selected tasks%n", 
+                              i);
 		}
 		}
 	}
@@ -411,8 +414,8 @@ public class Simker {
 
 			System.out.println("    load [file.csv]                                load tasks from file. If no file path is provided, load from `tasks.csv`.");
 
-			System.out.println("    select <-a | --all | index ...>                apply command to the select tasks.");
-            System.out.println("           <rm | progress | mark <status>>"); 
+			System.out.println("    select <-a | --all | index ...>                apply command to the select tasks. The subcommand `-a` (`--all`) acts just as if the user added");
+            System.out.println("           <rm | progress | mark <status>>         all the indexes manually."); 
 			
 			System.out.println("    progress <index>                               up the status. If the status is CLOSED, delete it");
 	
