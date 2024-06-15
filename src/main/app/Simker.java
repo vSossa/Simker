@@ -154,7 +154,7 @@ public class Simker {
 		}
 
 		case "rm": {
-			removeTask(tokens);
+			removeTasks(tokens);
 			break;
 		}
 
@@ -347,7 +347,7 @@ public class Simker {
 				removeAndIndexed.add(null);
 			for (int j = 0; j < tokensToCommand.size(); ++j) {
 				removeAndIndexed.set(1, tokensToCommand.get(j));
-				removeTask(removeAndIndexed);	
+				removeTasks(removeAndIndexed);	
 			}
 			break;
 		}
@@ -419,9 +419,13 @@ public class Simker {
 			System.out.println("    progress <index>                               up the status. If the status is CLOSED, delete it");
 	
 			System.out.println("    exit                                           alias for `quit` command.");
+
 			System.out.println("    clear                                          clear screen.");
+
 			System.out.println("    ls                                             list tasks.");
+
 			System.out.println("    reset                                          alias for `rm --all` and `rm -a`.");
+
 			System.out.println("    help                                           show this message.");
 			break;
 		}
@@ -433,7 +437,7 @@ public class Simker {
 		}
 	}
 
-	public void removeTask(ArrayList<Token> args) {
+	public void removeTasks(ArrayList<Token> args) {
 		switch (args.size()) { 
 		case 1: {
 			System.out.printf("ERROR: not enough arguments for `%s`%n",
@@ -855,16 +859,16 @@ public class Simker {
 		}
 	}
 
-	private ArrayList<Token> sortTokenIndexes(ArrayList<Token> indexed) {
+	private ArrayList<Token> sortTokenIndexes(ArrayList<Token> indexes) {
 		ArrayList<Token> sortIndexes = new ArrayList<>();
-			sortIndexes.addAll(indexed);
-		int len = indexed.size();
+			sortIndexes.addAll(indexes);
+		int len = indexes.size();
 		
 		for (int i = 0; i < len - 1; ++i) {
 			boolean swap = false; 
 			for (int j = 0; j < len - i - 1; ++j) {
-				if (Integer.parseInt(indexed.get(j).value()) < 
-                    Integer.parseInt(indexed.get(j + 1).value())) {
+				if (Integer.parseInt(indexes.get(j).value()) < 
+                    Integer.parseInt(indexes.get(j + 1).value())) {
 					swap = true;
 					Token aux = sortIndexes.get(j);
 					sortIndexes.set(j, sortIndexes.get(j+1));
