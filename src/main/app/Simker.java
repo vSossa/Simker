@@ -102,6 +102,7 @@ public class Simker {
 			command = input.nextLine();	
 			System.out.println();
 		}
+		System.out.println("Bye!");
 		input.close();
 	}
 
@@ -307,8 +308,7 @@ public class Simker {
 		}
 
 		if (i == len) {
-			System.out.printf("%d: ERROR: missing command%n",
-                              i);
+			System.out.printf("ERROR: missing command%n");
 			return ;
 		} 
 
@@ -319,7 +319,7 @@ public class Simker {
 		case "progress": {
 			if (i != len - 1) {
 				System.out.printf("%d: ERROR: too many arguments for `%s`%n",
-                                  i, 
+                                  command.index(), 
                                   command.value());
 				break;
 			}
@@ -337,7 +337,7 @@ public class Simker {
 		case "rm": {
 			if (i != len - 1) {
 				System.out.printf("%d: ERROR: too many arguments for `%s`%n",
-                                  i, 
+								  command.index(),
                                   command.value());
 				break;
 			}
@@ -355,13 +355,13 @@ public class Simker {
 		case "mark": {
 			if (i == len - 1) { 
 				System.out.printf("%d: ERROR: not enough arguments for `%s`%n",
-                                  i, 
+                                  command.index(), 
                                   command.value());	
 				break;
 			} 
 			if (i > len - 2) {
 				System.out.printf("%d: ERROR: too many arguments for `%s`%n",
-                                  i, 
+                                  command.index(), 
                                   command.value());
 				break;
 			}
@@ -383,7 +383,6 @@ public class Simker {
 		}
 		}
 	}
-
 
 	public void clear(ArrayList<Token> args) {
 		if (args == null || args.size() == 1) {
@@ -685,10 +684,8 @@ public class Simker {
 
 	public int quit(ArrayList<Token> args) {
 		int returnStatus = 1;
-		String bye = "Bye!";
 		switch (args.size()) {
 		case 1: {
-			System.out.println(bye);
 			returnStatus = 0;
 			break;
 		}
@@ -711,7 +708,6 @@ public class Simker {
 					   arg.value().equals("--save")) {
 				if (saveTasks("tasks.csv")) { 
 					System.out.printf("Saving tasks...%n");
-					System.out.println(bye);
 					returnStatus = 0;
 				} else {
 					System.out.printf("ERROR: could not save tasks%n");
@@ -758,7 +754,6 @@ public class Simker {
 			if (saveTasks(filePath)) { 
 				System.out.printf("Saving tasks into %s...%n",
 								  filePath);
-				System.out.println(bye);
 				returnStatus = 0;
 			} else {
 				System.out.printf("ERROR: could not write into the file: `%s`%n",
