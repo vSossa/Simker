@@ -324,12 +324,12 @@ public class Simker {
 				break;
 			}
 
-			ArrayList<Token> progressAndIndexed = new ArrayList<>();
-				progressAndIndexed.add(command);
-				progressAndIndexed.add(null);
+			ArrayList<Token> progressAndIndex = new ArrayList<>();
+				progressAndIndex.add(command);
+				progressAndIndex.add(null);
 			for (int j = 0; j < tokensToCommand.size(); ++j) {
-				progressAndIndexed.set(1, tokensToCommand.get(j));
-				progressTask(progressAndIndexed);	
+				progressAndIndex.set(1, tokensToCommand.get(j));
+				progressTask(progressAndIndex);	
 			}
 			break;
 		}
@@ -342,12 +342,12 @@ public class Simker {
 				break;
 			}
 
-			ArrayList<Token> removeAndIndexed = new ArrayList<>();
-				removeAndIndexed.add(command);
-				removeAndIndexed.add(null);
+			ArrayList<Token> removeAndIndex = new ArrayList<>();
+				removeAndIndex.add(command);
+				removeAndIndex.add(null);
 			for (int j = 0; j < tokensToCommand.size(); ++j) {
-				removeAndIndexed.set(1, tokensToCommand.get(j));
-				removeTasks(removeAndIndexed);	
+				removeAndIndex.set(1, tokensToCommand.get(j));
+				removeTasks(removeAndIndex);	
 			}
 			break;
 		}
@@ -366,14 +366,14 @@ public class Simker {
 				break;
 			}
 			
-			ArrayList<Token> markAndIndexes = new ArrayList<>();
-				markAndIndexes.add(command);
-				markAndIndexes.add(null);
-				markAndIndexes.add(null);
-				markAndIndexes.set(2, args.get(++i));
+			ArrayList<Token> markAndIndex = new ArrayList<>();
+				markAndIndex.add(command);
+				markAndIndex.add(null);
+				markAndIndex.add(null);
+				markAndIndex.set(2, args.get(++i));
 			for (int j = 0; j < tokensToCommand.size(); ++j) {
-				markAndIndexes.set(1, tokensToCommand.get(j));
-				markTask(markAndIndexes);
+				markAndIndex.set(1, tokensToCommand.get(j));
+				markTask(markAndIndex);
 			}
 			break;	
 		}
