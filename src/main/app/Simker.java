@@ -254,6 +254,8 @@ public class Simker {
 	}
 
 	public void selectTasksAndDoCommand(ArrayList<Token> args) {
+		// TODO: allow the user to select all of the tasks
+	    // with `select --all <command>`
 		ArrayList<Token> tokensToCommand = new ArrayList<>();
 
 		int len = args.size();
@@ -514,7 +516,7 @@ public class Simker {
 			} 
 
 			String name = t.prettyValue();
-			if (Tokenizer.stripLeft(name, " ", 0) == -1) {
+			if (name.length() == 0) {
 				System.out.println("ERROR: the name of a task must have at least one character");
 				break;
 			}
@@ -673,13 +675,13 @@ public class Simker {
 				break;
 			} 
 
-			if (arg.value().equals("-o") || 
-				arg.value().equals("--output")) {
+			if (arg.prettyValue().equals("-o") || 
+				arg.prettyValue().equals("--output")) {
 				System.out.printf("%d: ERROR: missing file for `%s`%n",
 								  arg.index(),
 								  arg.value());
-			} else if (arg.value().equals("-s") ||
-					   arg.value().equals("--save")) {
+			} else if (arg.prettyValue().equals("-s") ||
+					   arg.prettyValue().equals("--save")) {
 				if (saveTasks("tasks.csv")) { 
 					System.out.printf("Saving tasks...%n");
 					returnStatus = 0;
@@ -702,8 +704,8 @@ public class Simker {
 								  subcommand.type());
 				break;
 			}
-			if (!(subcommand.value().equals("-o") || 
-				subcommand.value().equals("--output"))) {
+			if (!(subcommand.prettyValue().equals("-o") || 
+				subcommand.prettyValue().equals("--output"))) {
 				System.out.printf("%d: ERROR: unknow subcommand `%s`%n",
 								  subcommand.index(),
 								  subcommand.value());
@@ -717,14 +719,14 @@ public class Simker {
 								  file.type());
 				break;
 			}
-			if (!file.value().endsWith(".csv")) {
+			if (!file.prettyValue().endsWith(".csv")) {
 				System.out.printf("%d: ERROR: expected a csv file but got `%s`%n",
 								  file.index(),
 								  file.value());
 				break;
 			}
 
-			String filePath = file.value();
+			String filePath = file.prettyValue();
 			if (saveTasks(filePath)) { 
 				System.out.printf("Saving tasks into %s...%n",
 								  filePath);
@@ -766,8 +768,8 @@ public class Simker {
 				break;
 			}
 
-			if (t.value().equals("-o") ||
-				t.value().equals("--output")) {
+			if (t.prettyValue().equals("-o") ||
+				t.prettyValue().equals("--output")) {
 				System.out.printf("%d: ERROR: missing file path%n");
 			} else { 
 				System.out.printf("%d: ERROR: unknow subcommand `%s`%n",
@@ -786,8 +788,8 @@ public class Simker {
 				break;
 			}
 
-			if (!subcommand.equals("-o") &&
-				!subcommand.equals("--output")) {
+			if (!subcommand.value().equals("-o") &&
+				!subcommand.value().equals("--output")) {
 				System.out.printf("%d: ERROR: unknow subcommand `%s`%n",
 								  subcommand.index(),
 								  subcommand.value());
@@ -801,14 +803,14 @@ public class Simker {
 								  file.type());
 				break;
 			}
-			if (!file.value().endsWith(".csv")) {
+			if (!file.prettyValue().endsWith(".csv")) {
 				System.out.printf("%d: ERROR: expected a csv file but got `%s`%n",
 								  file.index(),
 								  file.value());
 				break;
 			}
 
-			if (saveTasks(file.value())) { 
+			if (saveTasks(file.prettyValue())) { 
 				System.out.printf("Saving tasks into %s...%n",
 								  file.value());
 			} else {

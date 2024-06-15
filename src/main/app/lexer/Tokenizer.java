@@ -20,7 +20,6 @@ public class Tokenizer {
 			if (count(rawToken, "\"", 0) >= 1) { 
 				int startIndex = index;	
 				Token stringToken = buildStringToken(index, "\"", rawTokens);
-				index = stringToken.index();
 
 				if (stringToken.value().length() == 1 ||
   					(!stringToken.value().startsWith("\"") || !stringToken.value().endsWith("\"")) ||
@@ -31,12 +30,12 @@ public class Tokenizer {
 				} 
 
 				tokens.add(stringToken);
-	
+				index = stringToken.index();
+
 			// 'STRING'
 			} else if (count(rawToken, "\'", 0) >= 1) {
 				int startIndex = index;	
 				Token stringToken = buildStringToken(index, "\'", rawTokens);
-				index = stringToken.index();
 
 				if (stringToken.value().length() == 1 ||
   					(!stringToken.value().startsWith("\'") || !stringToken.value().endsWith("\'")) ||
@@ -47,6 +46,7 @@ public class Tokenizer {
 				} 
 
 				tokens.add(stringToken);
+				index = stringToken.index();
 
 			// WHITESPACE
 			} else if (len == 0) {
@@ -88,12 +88,7 @@ public class Tokenizer {
 
 		return new Token(indexStart, TokenType.STRING, value);
 	}
-	/*
-		strips the prefix out of the string from the startIndex.
-		
-		returns -1 if prefix is not in string
-		otherwise, returns the index right next to the strip prefix.
-	*/
+
 	public static int stripLeft(String string, String prefix, int startIndex) {
 		int location = startIndex;
 		int offset = prefix.length();
@@ -114,15 +109,6 @@ public class Tokenizer {
 		return location;
 	}
 
-	/*
-		count the number of times s2 is in s1 from the startIndex
-		until the end.
-
-		if startIndex is out of bounds, returns -1
-		if s2 == "", returns s1.length()
-		if s2.length() > s1.length(), returns 0
-		else returns the count	
-	*/
 	public static int count(String s1, String s2, int startIndex) {
 		int counter = 0;
 		int len = s1.length();
@@ -140,13 +126,6 @@ public class Tokenizer {
 		return counter;
 	}
 
-	/*
-		slices the string by a single whitespace and returns those slices. 
-		if the string is empty, returns an empty array.
-		
-		the only spaces that are strip off the string are those in 
-		the beggining. 
-	*/
 	public static ArrayList<String> splitString(String string, char delimiter) {
 		int location, locationEnd;
 		int len = string.length();
