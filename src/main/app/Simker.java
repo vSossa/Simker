@@ -283,14 +283,10 @@ public class Simker {
 		ArrayList<Token> tokensToCommand = new ArrayList<>();
 
 		int len = args.size();
-		if (len == 1) { 
+		if (len <= 2) { 
 			System.out.printf("ERROR: not enough arguments%n");
 			return ;
 		} 
-		if (len == 2) {
-			System.out.printf("ERROR: not enough arguments%n");
-			return ;
-		}
 	
 		int i = 1;
 		while (i < len && args.get(i).type() != TokenType.COMMAND) {
@@ -388,30 +384,6 @@ public class Simker {
 		}
 	}
 
-	private ArrayList<Token> sortTokenIndexes(ArrayList<Token> indexed) {
-		ArrayList<Token> sortIndexes = new ArrayList<>();
-			sortIndexes.addAll(indexed);
-		int len = indexed.size();
-		
-		for (int i = 0; i < len - 1; ++i) {
-			boolean swap = false; 
-			for (int j = 0; j < len - i - 1; ++j) {
-				if (Integer.parseInt(indexed.get(j).value()) < 
-                    Integer.parseInt(indexed.get(j + 1).value())) {
-					swap = true;
-					Token aux = sortIndexes.get(j);
-					sortIndexes.set(j, sortIndexes.get(j+1));
-					sortIndexes.set(j+1, aux);
-				}
-			}
-
-			if (!swap) { 
-				break;
-			}
-		}
-
-		return sortIndexes;
-	}
 
 	public void clear(ArrayList<Token> args) {
 		if (args == null || args.size() == 1) {
@@ -431,8 +403,8 @@ public class Simker {
 			System.out.println("    mark <index> <status>                          mark the index-task with the given status, which is given by 0, 1 or 2, or -o (--open),");
 			System.out.println("                                                   -i (--in-progress) or -c (--closed), respectively.");
 
-			System.out.println("    rm <-a | --all | index ... |                   remove index-task or all or all of the tasks in a range.");
-			System.out.println("       --range <indexBegin> <indexEnd | ..>>       If, as the last argument of the `--range` subcommand, you pass `..`, then all of the tasks"); 
+			System.out.println("    rm <-a | --all | index |                       remove index-task or all or all of the tasks in a range.");
+			System.out.println("        --range <indexBegin> <indexEnd | ..>>      If, as the last argument of the `--range` subcommand, you pass `..`, then all of the tasks"); 
 			System.out.println("                                                   between the beginning and the end are going to be removed.");
 
 			System.out.println("    save [-o <file.csv> | --output <file.csv>]     save tasks into a csv file.");
@@ -440,6 +412,12 @@ public class Simker {
 			System.out.println("          -s | --save]                             Note that `quit -s` and `quit --save` are aliases for `save` and then `quit`.");
 
 			System.out.println("    load [file.csv]                                load tasks from file. If no file path is provided, load from `tasks.csv`.");
+
+			System.out.println("    select <index ...> <rm | progress |            apply command to the select tasks");
+            System.out.println("                        mark <status>>"); 
+			
+			System.out.println("    progress <index>                               up the status. If the status is CLOSED, delete it");
+	
 			System.out.println("    exit                                           alias for `quit` command.");
 			System.out.println("    clear                                          clear screen.");
 			System.out.println("    ls                                             list tasks.");
@@ -875,6 +853,31 @@ public class Simker {
 							  t.value());
 		}
 		}
+	}
+
+	private ArrayList<Token> sortTokenIndexes(ArrayList<Token> indexed) {
+		ArrayList<Token> sortIndexes = new ArrayList<>();
+			sortIndexes.addAll(indexed);
+		int len = indexed.size();
+		
+		for (int i = 0; i < len - 1; ++i) {
+			boolean swap = false; 
+			for (int j = 0; j < len - i - 1; ++j) {
+				if (Integer.parseInt(indexed.get(j).value()) < 
+                    Integer.parseInt(indexed.get(j + 1).value())) {
+					swap = true;
+					Token aux = sortIndexes.get(j);
+					sortIndexes.set(j, sortIndexes.get(j+1));
+					sortIndexes.set(j+1, aux);
+				}
+			}
+
+			if (!swap) { 
+				break;
+			}
+		}
+
+		return sortIndexes;
 	}
 
 	private boolean saveTasks(String filePath) {
