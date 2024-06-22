@@ -11,45 +11,52 @@ public class Tokenizer {
 		rawTokens = splitString(string, ' ');
 		if (rawTokens.isEmpty()) return null;
 
-		final int LEN_RAW_TOKENS = rawTokens.size();
-		while (index < LEN_RAW_TOKENS) {
+		final int RAW_TOKENS_SIZE = rawTokens.size();
+		while (index < RAW_TOKENS_SIZE) {
 			String rawToken = rawTokens.get(index);
-			int len = rawToken.length();
 
 			// "STRING"
 			if (count(rawToken, "\"", 0) >= 1) { 
 				int startIndex = index;	
 				Token stringToken = buildStringToken(index, "\"", rawTokens);
 
-				if (stringToken.value().length() == 1 ||
-  					(!stringToken.value().startsWith("\"") || !stringToken.value().endsWith("\"")) ||
-                    (count(stringToken.value(), "\"", 0) > 2)) {
+				if (
+					stringToken.value().length() == 1     ||
+  					!stringToken.value().startsWith("\"") || 
+                    !stringToken.value().endsWith("\"")   ||
+                    count(stringToken.value(), "\"", 0) > 2
+				) {
 					System.out.printf("%d: ERROR: invalid string%n",
 									  startIndex);
 					return null;
 				} 
 
-				tokens.add(stringToken);
 				index = stringToken.index();
+				stringToken.correctIndex(startIndex);
+				tokens.add(stringToken);
 
 			// 'STRING'
 			} else if (count(rawToken, "\'", 0) >= 1) {
 				int startIndex = index;	
 				Token stringToken = buildStringToken(index, "\'", rawTokens);
 
-				if (stringToken.value().length() == 1 ||
-  					(!stringToken.value().startsWith("\'") || !stringToken.value().endsWith("\'")) ||
-                    (count(stringToken.value(), "\'", 0) > 2)) {
+				if (
+					stringToken.value().length() == 1     ||
+  					!stringToken.value().startsWith("\'") || 
+                    !stringToken.value().endsWith("\'")   ||
+                    count(stringToken.value(), "\'", 0) > 2
+				) {
 					System.out.printf("%d: ERROR: invalid string%n",
 									  startIndex);
 					return null;
 				} 
 
-				tokens.add(stringToken);
 				index = stringToken.index();
+				stringToken.correctIndex(startIndex);
+				tokens.add(stringToken);
 
 			// WHITESPACE
-			} else if (len == 0) {
+			} else if (rawToken.isEmpty()) {
 				++index;
 
 			// INT	
@@ -76,10 +83,11 @@ public class Tokenizer {
 	}
 
 	public static Token buildStringToken(int indexStart, String delimiter, ArrayList<String> stringParts) {
+		final int stringPartsSize = stringParts.size();
 		String value = stringParts.get(indexStart);	
 
 		++indexStart;
-		while (indexStart < stringParts.size() &&
+		while (indexStart < stringPartsSize &&
 			   count(value, delimiter, 0) < 2) {
 			value = value.concat(" ")
 						 .concat(stringParts.get(indexStart));
@@ -117,7 +125,6 @@ public class Tokenizer {
 		if (startIndex > len || startIndex < 0) return -1;	
 		if (offset == 0) return len - startIndex;
 		if (offset > len - startIndex) return counter;
-
 
 		for (int i = startIndex; i < len; i += offset) {
 			if (s1.substring(i, i + offset).equals(s2)) counter++;

@@ -40,71 +40,32 @@ public class Task {
 	public void setStatus(Status s) { this.status = s; }
 
 	public String toCSVFormat() {
-		String s;
-		if (this.status == Status.OPEN) { 
-			if (this.description.isEmpty()) {
-				s = String.format("0,\"%s\",\"\"\n", 
-								  this.name);
-			} else {
-				s = String.format("0,\"%s\",\"%s\"\n", 	
-								  this.name, 
-								  this.description);
-			}
-		} else if (this.status == Status.IN_PROGRESS) {
-			if (this.description.isEmpty()) {
-				s = String.format("1,\"%s\",\"\"\n", 
-								  this.name);
-			} else {
-				s = String.format("1,\"%s\",\"%s\"\n", 	
-								  this.name, 
-								  this.description);
-			}
-		} else {
-			if (this.description.isEmpty()) {
-				s = String.format("2,\"%s\",\"\"\n", 
-								  this.name);
-			} else {
-				s = String.format("2,\"%s\",\"%s\"\n", 	
-								  this.name, 
-								  this.description);
-			}
-		}
-
-		return s;
+		return (this.description.isEmpty()) ?
+			String.format("%d,\"%s\",\"\"\n",
+                          this.status.value(),
+                          this.name) :
+            String.format("%d,\"%s\",\"%s\"\n",
+                          this.status.value(),
+                          this.name,
+                          this.description);
 	}
 
 	@Override 
 	public String toString() {
-		String s;
+		String taskString = (this.description.isEmpty()) ?
+			this.name : 
+            String.format("%s : %s", 
+                          this.name, 
+                          this.description);
+				
 		if (this.status == Status.OPEN) { 
-			if (this.description.isEmpty()) {
-				s = String.format("[ ] %s", 
-								  this.name);
-			} else {
-				s = String.format("[ ] %s : %s", 	
-								  this.name, 
-								  this.description);
-			}
+			taskString = "[ ] ".concat(taskString);
 		} else if (this.status == Status.IN_PROGRESS) {
-			if (this.description.isEmpty()) {
-				s = String.format("[.] %s", 
-								  this.name);
-			} else {
-				s = String.format("[.] %s : %s", 	
-								  this.name, 
-								  this.description);
-			}
+			taskString = "[.] ".concat(taskString);
 		} else {
-			if (this.description.isEmpty()) {
-				s = String.format("[x] %s", 
-								  this.name);
-			} else {
-				s = String.format("[x] %s : %s", 	
-								  this.name, 
-								  this.description);
-			}
+			taskString = "[x] ".concat(taskString);
 		}
 
-		return s;
+		return taskString;
 	}
 } 

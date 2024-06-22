@@ -15,11 +15,24 @@ public class Token {
 
 	public int index()      { return this.index; }
 	public TokenType type() { return this.type; }
-	public String value() { return this.value; }
+	public String value()   { return this.value; }
+
+	/* 
+	 * Specific for string-tokens because of the
+	 * way I construct the Tokens
+	 */
 	public String prettyValue()   { 
 		String pretty = this.value.toString();
 		pretty = (pretty.startsWith("\"")) ?
 			pretty.replace("\"", "") : pretty.replace("\'", "");
 		return pretty; 
+	}
+
+	/* 
+	 * Specific for string-tokens because of the 
+	 *  way I construct the Tokens
+	 */
+	public void correctIndex(int index) {
+		this.index = index;
 	}
 }

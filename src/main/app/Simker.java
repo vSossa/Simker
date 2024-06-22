@@ -15,22 +15,16 @@ import java.util.ArrayList;
 public class Simker {
 	private List<Task> tasks;	
 
-	private void todo(String message) {
-		System.out.printf("TODO: %s%n", message);
-	}
-
 	public Simker() {
 		this.tasks = new ArrayList<>();	
 	}
 
-	public void loadTasks(String tasksFilePath) {
+	public boolean loadTasksFromFile(String filePath) {
 		List<String> lines = null;
 		try { 
-			lines = Files.readAllLines(Paths.get(tasksFilePath));
+			lines = Files.readAllLines(Paths.get(filePath));
 		} catch (IOException e) {
-			System.out.printf("ERROR: could not read tasks from `%s`%n",
-							  tasksFilePath);
-			System.exit(1);
+			return false;
 		} 
 
 		for (String line : lines) {
@@ -38,13 +32,12 @@ public class Simker {
 			String name = "";
 			String description = "";
 
-			ArrayList<String> taskComponents = Tokenizer.splitString(line, ',');
-			int len = taskComponents.size();
 			int j = 0;
+			ArrayList<String> taskComponents = Tokenizer.splitString(line, ',');
 
 			String statusValue = taskComponents.get(j);
-			s = statusValueToStatus(Integer.parseInt(statusValue));
-			++j;
+				s = statusValueToStatus(Integer.parseInt(statusValue));
+				++j;
 
 			Token tokenName = Tokenizer.buildStringToken(j, "\"", taskComponents);
 				name = tokenName.prettyValue();
@@ -53,12 +46,14 @@ public class Simker {
 			Token tokenDescription = Tokenizer.buildStringToken(j, "\"", taskComponents);
 				description = tokenDescription.prettyValue();
 
-			if (description.length() == 0) {
+			if (stringIsEmpty(description)) {
 				this.tasks.add( new Task(s, name) );
 			} else {
 				this.tasks.add( new Task(s, name, description) );
 			}
 		}
+		
+		return true;
 	}
 
 	public void menu() {
@@ -87,66 +82,44 @@ public class Simker {
 		
 		Token op = tokens.get(0);
 		switch (op.value()) {
-		case "add": {
-			addTask(tokens);	
+		case "add": 
+			addTask(tokens); 
 			break;
-		}	
-
-		case "mark": {
-			markTask(tokens);
+		case "mark": 
+			markTask(tokens); 
 			break;
-		}
-
-		case "progress": {
-			progressTask(tokens);
+		case "progress": 
+			progressTask(tokens); 
 			break;
-		}
-
-		case "clear": {
-			clear(tokens);
+		case "clear": 
+			clear(tokens); 
 			break;
-		}
-
-		case "help": {
-			usage(tokens);
+		case "help": 
+			usage(tokens); 
 			break;
-		}
-
-		case "exit": case "quit": {
+		case "ls": 
+			listTasks(tokens); 
+			break;
+		case "load": 
+			loadTasks(tokens); 
+			break;
+		case "rm": 	
+			removeTasks(tokens); 
+            break;
+		case "save": 
+			saveTasks(tokens); 
+            break;
+		case "select": 
+			selectTasksAndDoCommand(tokens); 
+            break;
+		case "reset": 
+			resetTasks(tokens); 
+            break;
+		case "exit": 
+		case "quit": 
 			returnStatus = quit(tokens);
 			break;
-		}
-
-		case "ls": {
-			listTasks(tokens);	
-			break;
-		}
-
-		case "load": {
-			loadTasks(tokens);
-			break;
-		}
-
-		case "rm": {
-			removeTasks(tokens);
-			break;
-		}
-
-		case "save": {
-			saveTasks(tokens);
-			break;
-		}
-
-		case "select": {
-			selectTasksAndDoCommand(tokens);
-			break;
-		}
-
-		case "reset": {
-			resetTasks(tokens);
-			break;
-		}
-
+		
 		default: {
 			System.out.printf("%d: ERROR: unknow command: `%s`%n", 
 							  op.index(),
@@ -219,28 +192,34 @@ public class Simker {
 	public void loadTasks(ArrayList<Token> args) {
 		switch (args.size()) {
 		case 1: {
-			loadTasks("tasks.csv");
-			System.out.println("Loading tasks...");
+			if (loadTasksFromFile("tasks.csv")) {
+				System.out.println("Loading tasks...");
+			} else {
+				System.out.printf("ERROR: could not read tasks from `%s`%n",
+								  "tasks.csv");
+			}
 			break;
 		}
 
 		case 2: {
 		    Token filePath = args.get(1);
 			if (filePath.type() != TokenType.STRING) {
-				System.out.printf("%d: ERROR: expected STRING but got: `%s`%n",
-								  filePath.index(),
+				System.out.printf("ERROR: expected STRING but got `%s`%n",
 								  filePath.value());
 				break;
 			}
 			if (!filePath.value().endsWith(".csv")) {
-				System.out.printf("%d: ERROR: expected a csv file but got: `%s`%n",
-								  filePath.index(),
+				System.out.printf("ERROR: expected a csv file but got: `%s`%n",
 								  filePath.value());
 				break;
 			}
 
-			loadTasks(filePath.value());
-			System.out.println("Loading tasks...");
+			if (loadTasksFromFile(filePath.value())) {
+				System.out.println("Loading tasks...");
+			} else {
+				System.out.printf("ERROR: could not read tasks from `%s`%n",
+								  filePath.value());
+			}
 			break;	
 		}
 
@@ -322,6 +301,7 @@ public class Simker {
 		sortTokenIndexes(tokensToCommand);	
 
 		Token command = args.get(i);
+		final int TOKENS_SIZE = tokensToCommand.size();
 		switch (command.value()) {
 		case "progress": {
 			if (i != len - 1) {
@@ -333,7 +313,7 @@ public class Simker {
 			ArrayList<Token> progressAndIndex = new ArrayList<>();
 				progressAndIndex.add(command);
 				progressAndIndex.add(null);
-			for (int j = 0; j < tokensToCommand.size(); ++j) {
+			for (int j = 0; j < TOKENS_SIZE; ++j) {
 				progressAndIndex.set(1, tokensToCommand.get(j));
 				progressTask(progressAndIndex);	
 			}
@@ -350,7 +330,7 @@ public class Simker {
 			ArrayList<Token> removeAndIndex = new ArrayList<>();
 				removeAndIndex.add(command);
 				removeAndIndex.add(null);
-			for (int j = 0; j < tokensToCommand.size(); ++j) {
+			for (int j = 0; j < TOKENS_SIZE; ++j) {
 				removeAndIndex.set(1, tokensToCommand.get(j));
 				removeTasks(removeAndIndex);	
 			}
@@ -373,7 +353,7 @@ public class Simker {
 				markAndIndex.add(command);
 				markAndIndex.add(null);
 				markAndIndex.add(args.get(++i)); // the status
-			for (int j = 0; j < tokensToCommand.size(); ++j) {
+			for (int j = 0; j < TOKENS_SIZE; ++j) {
 				markAndIndex.set(1, tokensToCommand.get(j));
 				markTask(markAndIndex);
 			}
@@ -661,7 +641,7 @@ public class Simker {
 				System.out.println("**empty**");
 			} else {
 				for (int i = 0; i < this.tasks.size(); ++i) {
-					System.out.printf("%d. %s%n",
+					System.out.printf("%2d. %s%n",
 									  i,
 									  this.tasks.get(i));
 				}
@@ -857,8 +837,10 @@ public class Simker {
 
 		// bubble sort
 		for (int i = 0; i < len - 1; ++i) {
+
 			boolean swap = false; 
 			for (int j = 0; j < len - i - 1; ++j) {
+
 				// decreasing order
 				if (Integer.parseInt(indexes.get(j).value()) < 
                     Integer.parseInt(indexes.get(j + 1).value())) {
@@ -902,9 +884,11 @@ public class Simker {
 	private void writeTasksIntoFile(Path file) 
 	throws IOException {
 		for (Task task : this.tasks) {
-			Files.writeString(file, 
-							  task.toCSVFormat(),
-							  StandardOpenOption.APPEND);	
+			Files.writeString(
+				file, 
+                task.toCSVFormat(),
+				StandardOpenOption.APPEND
+            );	
 		}
 	}
 
